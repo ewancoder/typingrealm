@@ -5,6 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using TypingRealm.Authentication;
 using TypingRealm.Communication;
 using TypingRealm.Messaging;
+using TypingRealm.Messaging.Broker.Client;
+using TypingRealm.Messaging.Broker.Tcp;
 using TypingRealm.Messaging.Serialization;
 using TypingRealm.Messaging.Serialization.Json;
 using TypingRealm.Messaging.Serialization.Protobuf;
@@ -39,7 +41,11 @@ namespace TypingRealm.Hosting
                 .AddTyrServiceWithoutAspNetAuthentication()
                 .UseLocalProvider();
 
+            builder.AddBrokerMessaging();
+
             services.AddHostedService<TcpServerHostedService>();
+
+            services.AddHostedService<StartupActionRunner>();
 
             return builder;
         }
@@ -68,7 +74,12 @@ namespace TypingRealm.Hosting
                 .AddTyrWebServiceAuthentication()
                 .UseLocalProvider();
 
+            services.AddProtobuf(); // We need it for TcpBrokeredMessaging :(
+            builder.AddBrokerMessaging();
+
             services.AddTransient<IStartupFilter, SignalRStartupFilter>();
+
+            services.AddHostedService<StartupActionRunner>();
 
             return builder;
         }
@@ -92,8 +103,21 @@ namespace TypingRealm.Hosting
 
             services.AddTransient<IStartupFilter, WebApiStartupFilter>();
 
+            services.AddHostedService<StartupActionRunner>();
+
             return services;
         }
-    }
 
+        private static MessageTypeCacheBuilder AddBrokerMessaging(this MessageTypeCacheBuilder messageTypes)
+        {
+            var services = messageTypes.Services;
+
+            services.AddTcpBrokerConnection();
+            messageTypes.AddMessagingBrokerClient();
+
+            services.AddSingleton<IStartupAction, ListenToMessageBrokerStartupAction>();
+
+            return messageTypes;
+        }
+    }
 }

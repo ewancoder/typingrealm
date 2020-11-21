@@ -9,14 +9,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TypingRealm.Authentication\TypingRealm.Authentication.csproj" />
-    <ProjectReference Include="..\TypingRealm.Communication\TypingRealm.Communication.csproj" />
-    <ProjectReference Include="..\TypingRealm.Hosting\TypingRealm.Hosting.csproj" />
-    <ProjectReference Include="..\TypingRealm.Messaging.Broker\TypingRealm.Messaging.Broker.csproj" />
+    <ProjectReference Include="..\TypingRealm.Common\TypingRealm.Common.csproj" />
+    <ProjectReference Include="..\TypingRealm.Messaging.Broker.Core\TypingRealm.Messaging.Broker.Core.csproj" />
+    <ProjectReference Include="..\TypingRealm.Messaging.Broker.Tcp\TypingRealm.Messaging.Broker.Tcp.csproj" />
     <ProjectReference Include="..\TypingRealm.Messaging.Core\TypingRealm.Messaging.Core.csproj" />
     <ProjectReference Include="..\TypingRealm.Messaging.Serialization.Core\TypingRealm.Messaging.Serialization.Core.csproj" />
     <ProjectReference Include="..\TypingRealm.Messaging\TypingRealm.Messaging.csproj" />
-    <ProjectReference Include="..\TypingRealm.Profiles.Api.Client\TypingRealm.Profiles.Api.Client.csproj" />
   </ItemGroup>
 
 </Project>

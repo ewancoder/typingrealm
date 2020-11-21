@@ -1,5 +1,10 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using TypingRealm.Hosting;
 using TypingRealm.Messaging;
+using TypingRealm.Messaging.Broker.Client;
 using TypingRealm.Messaging.Connecting;
 using TypingRealm.Messaging.Serialization;
 using TypingRealm.Profiles.Api.Client;
@@ -25,6 +30,8 @@ namespace TypingRealm.RopeWar
                 .RegisterHandler<StartContest, StartContestHandler>()
                 .RegisterHandler<PullRope, PullRopeHandler>();
 
+            services.AddTransient<IStartupAction, BrokerSubscriptionStartupAction>();
+
             messageTypes.AddRopeWarMessages();
             return messageTypes;
         }
@@ -34,4 +41,29 @@ namespace TypingRealm.RopeWar
             return builder.AddMessageTypesFromAssembly(typeof(JoinContest).Assembly);
         }
     }
+
+    // TODO: Remove dependency (reference) to TypingRealm.Hosting after moving IStartupAction to some other assembly.
+    public sealed class BrokerSubscriptionStartupAction : IStartupAction
+    {
+        // TODO: Remove dependency (reference) to TypingRealm.Messaging.Broker after refactoring IBrokerConnectionListener to separate subscriber.
+        private readonly IBrokerConnectionListener _broker;
+
+        public BrokerSubscriptionStartupAction(IBrokerConnectionListener broker)
+        {
+            _broker = broker;
+        }
+
+        public ValueTask RunAync(CancellationToken cancellationToken)
+        {
+            return _broker.SubscribeToAsync<TestMessage>("test", HandleAsync, cancellationToken);
+        }
+
+        private ValueTask HandleAsync(TestMessage message)
+        {
+            Console.WriteLine($"Received test message: {message.Data}.");
+            return default;
+        }
+    }
+
+    public record TestMessage(string Data);
 }

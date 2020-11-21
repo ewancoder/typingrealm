@@ -91,6 +91,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TypingRealm.Hosting", "Typi
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Old", "Old", "{BC27E087-5CF8-4B05-BDC3-C6621BED5921}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TypingRealm.Messaging.Broker", "TypingRealm.Messaging.Broker\TypingRealm.Messaging.Broker.csproj", "{9944B457-F72F-4BC0-89FE-A7564F1C1A41}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypingRealm.Messaging.Broker.Server", "TypingRealm.Messaging.Broker.Server\TypingRealm.Messaging.Broker.Server.csproj", "{32A5824E-DB56-41B1-A484-9ADE1011442F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypingRealm.Messaging.Broker.Core", "TypingRealm.Messaging.Broker.Core\TypingRealm.Messaging.Broker.Core.csproj", "{A8E21970-70D0-4180-AB77-668BC969787A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypingRealm.Messaging.Broker.Tcp", "TypingRealm.Messaging.Broker.Tcp\TypingRealm.Messaging.Broker.Tcp.csproj", "{10A74355-37DF-4049-9A0E-6063837E047D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -225,6 +233,22 @@ Global
 		{AB388D12-E5EF-47AD-B0DA-74F642C35854}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB388D12-E5EF-47AD-B0DA-74F642C35854}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AB388D12-E5EF-47AD-B0DA-74F642C35854}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9944B457-F72F-4BC0-89FE-A7564F1C1A41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9944B457-F72F-4BC0-89FE-A7564F1C1A41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9944B457-F72F-4BC0-89FE-A7564F1C1A41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9944B457-F72F-4BC0-89FE-A7564F1C1A41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32A5824E-DB56-41B1-A484-9ADE1011442F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32A5824E-DB56-41B1-A484-9ADE1011442F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32A5824E-DB56-41B1-A484-9ADE1011442F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32A5824E-DB56-41B1-A484-9ADE1011442F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8E21970-70D0-4180-AB77-668BC969787A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8E21970-70D0-4180-AB77-668BC969787A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8E21970-70D0-4180-AB77-668BC969787A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8E21970-70D0-4180-AB77-668BC969787A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10A74355-37DF-4049-9A0E-6063837E047D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10A74355-37DF-4049-9A0E-6063837E047D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10A74355-37DF-4049-9A0E-6063837E047D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10A74355-37DF-4049-9A0E-6063837E047D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -263,6 +287,10 @@ Global
 		{D4B7D0F0-50E3-42D3-BF63-9283FA6B7690} = {BC27E087-5CF8-4B05-BDC3-C6621BED5921}
 		{3CA9C529-8B22-499A-9F36-F2CAA26C7D65} = {C00AAAEB-23DF-4B66-9326-E73C29F075D5}
 		{AB388D12-E5EF-47AD-B0DA-74F642C35854} = {C00AAAEB-23DF-4B66-9326-E73C29F075D5}
+		{9944B457-F72F-4BC0-89FE-A7564F1C1A41} = {C00AAAEB-23DF-4B66-9326-E73C29F075D5}
+		{32A5824E-DB56-41B1-A484-9ADE1011442F} = {C00AAAEB-23DF-4B66-9326-E73C29F075D5}
+		{A8E21970-70D0-4180-AB77-668BC969787A} = {792AC347-74FB-4A4E-AD3B-D78B344D17BB}
+		{10A74355-37DF-4049-9A0E-6063837E047D} = {C00AAAEB-23DF-4B66-9326-E73C29F075D5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BCBE02AB-E010-400D-99F3-DE372EABFDE7}
