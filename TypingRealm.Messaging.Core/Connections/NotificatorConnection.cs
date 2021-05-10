@@ -33,7 +33,7 @@ namespace TypingRealm.Messaging.Connections
             if (_notificator.ReceivedMessagesBuffer.TryDequeue(out var message))
                 return message;
 
-            var tcs = new TaskCompletionSource<bool>();
+            var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             void Handle() => tcs.SetResult(true);
             _notificator.Received += Handle;

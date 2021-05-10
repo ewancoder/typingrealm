@@ -154,7 +154,7 @@ namespace TypingRealm.Messaging.Client
                     {
                         // Setup subscription for acknowledgement.
 
-                        tcs = new TaskCompletionSource();
+                        tcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
                         ValueTask Handler(AcknowledgeReceived acknowledgeReceived)
                         {
@@ -213,7 +213,7 @@ namespace TypingRealm.Messaging.Client
         public async ValueTask<TResponse> SendQueryAsync<TResponse>(object message, CancellationToken cancellationToken)
             where TResponse : class
         {
-            var tcs = new TaskCompletionSource<TResponse>();
+            var tcs = new TaskCompletionSource<TResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
             string? subscriptionId = null;
 
             try
