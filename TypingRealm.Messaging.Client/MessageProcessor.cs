@@ -49,6 +49,27 @@ namespace TypingRealm.Messaging.Client
     // TODO: Introduce heartbeat and heartbeat timeout when we try to reconnect after no reply.
     public sealed class MessageProcessor : AsyncManagedDisposable
     {
+        private sealed class QueuedMessage
+        {
+            public QueuedMessage(
+                object message,
+                Action<ClientToServerMessageMetadata>? metadataSetter,
+                bool requireAcknowledgement,
+                CancellationToken cancellationToken)
+            {
+                Message = message;
+                MetadataSetter = metadataSetter;
+                RequireAcknowledgement = requireAcknowledgement;
+                CancellationToken = cancellationToken;
+            }
+
+            public object Message { get; }
+            public Action<ClientToServerMessageMetadata>? MetadataSetter { get; }
+            public bool RequireAcknowledgement { get; }
+            public CancellationToken CancellationToken { get; }
+            public TaskCompletionSource Tcs { get; } = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        }
+
         private readonly ILogger<MessageProcessor> _logger;
         private readonly IClientConnectionFactory _connectionFactory;
         private readonly IMessageDispatcher _dispatcher;
@@ -63,6 +84,14 @@ namespace TypingRealm.Messaging.Client
             = new ConcurrentDictionary<string, Func<object, string?, ValueTask>>();
 
         private static readonly int _reconnectRetryCount = 3;
+
+        // TODO: Dispose of it.
+        private readonly CancellationTokenSource _processingCts = new CancellationTokenSource();
+        private readonly SemaphoreSlimLock _processingLock = new SemaphoreSlimLock();
+        private Task? _processing;
+        private QueuedMessage? _currentMessage;
+        private readonly ConcurrentQueue<QueuedMessage> _messageQueue
+            = new ConcurrentQueue<QueuedMessage>();
 
         private ConnectionResource? _resource;
 
@@ -86,6 +115,70 @@ namespace TypingRealm.Messaging.Client
 
         public bool IsConnected { get; private set; }
 
+        private async Task ProcessMessagesAsync()
+        {
+            if (_currentMessage == null && _messageQueue.IsEmpty)
+                return;
+
+            await using var _ = await _processingLock.UseWaitAsync(_processingCts.Token)
+                .ConfigureAwait(false);
+
+            while (IsConnected)
+            {
+                var current = GetNextQueuedMessage();
+                if (current == null)
+                    return;
+
+                var reconnectedTimes = 0;
+                while (true)
+                {
+                    try
+                    {
+                        await SendAsyncInternal(
+                            current.Message,
+                            current.MetadataSetter,
+                            current.RequireAcknowledgement,
+                            current.CancellationToken)
+                            .ConfigureAwait(false);
+
+                        _currentMessage = null;
+                        current.Tcs.SetResult();
+                        break;
+                    }
+                    catch (Exception exception)
+                    {
+                        _logger.LogError(exception, $"Error while sending message: {current.Message.GetType()}");
+
+                        if (reconnectedTimes == _reconnectRetryCount)
+                        {
+                            _logger.LogError(exception, $"Reached maximum about of retries. Failed to send the message.");
+                            current.Tcs.SetException(exception);
+                            return;
+                        }
+
+                        IsConnected = false;
+
+                        await ReconnectAsync().ConfigureAwait(false);
+                        reconnectedTimes++;
+                    }
+                }
+            }
+        }
+
+        private QueuedMessage? GetNextQueuedMessage()
+        {
+            if (_currentMessage != null)
+                return _currentMessage;
+
+            if (_messageQueue.TryDequeue(out var message))
+            {
+                _currentMessage = message;
+                return message;
+            }
+
+            return null;
+        }
+
         // This method is used within a lock so it shouldn't wait for lock itself anywhere inside.
         public async ValueTask ConnectAsync(string characterId, CancellationToken cancellationToken)
         {
@@ -95,21 +188,34 @@ namespace TypingRealm.Messaging.Client
             var connectionWithDisconnect = await _connectionFactory.ConnectAsync(cancellationToken)
                 .ConfigureAwait(false);
 
-            // Need to set it before calling ListenAndDispatchAsync.
-            IsConnected = true;
+            var savedMessages = _messageQueue.ToArray();
+            _messageQueue.Clear();
 
-            _resource = new ConnectionResource(
-                connectionWithDisconnect,
-                characterId,
-                cancellationToken);
+            try
+            {
+                // Need to set it before calling ListenAndDispatchAsync.
+                IsConnected = true;
 
-            Task listening(CancellationToken cancellationToken)
-                => ListenAndDispatchAsync();
+                _resource = new ConnectionResource(
+                    connectionWithDisconnect,
+                    characterId,
+                    cancellationToken);
 
-            _resource.SetListening(listening);
+                Task listening(CancellationToken cancellationToken)
+                    => ListenAndDispatchAsync();
 
-            await _authenticationService.AuthenticateAsync(this, characterId, _resource.CombinedCts.Token)
-                .ConfigureAwait(false);
+                _resource.SetListening(listening);
+
+                await _authenticationService.AuthenticateAsync(this, characterId, _resource.CombinedCts.Token)
+                    .ConfigureAwait(false);
+            }
+            finally
+            {
+                foreach (var message in savedMessages)
+                {
+                    _messageQueue.Enqueue(message);
+                }
+            }
         }
 
         public ValueTask SendWithoutAcknowledgementAsync(
@@ -129,7 +235,27 @@ namespace TypingRealm.Messaging.Client
             bool requireAcknowledgement,
             CancellationToken cancellationToken)
         {
-            string? subscriptionId = null; // For acknowledgement.
+            var queuedMessage = new QueuedMessage(
+                message,
+                metadataSetter,
+                requireAcknowledgement,
+                cancellationToken);
+
+            _messageQueue.Enqueue(queuedMessage);
+
+            _processing = ProcessMessagesAsync();
+
+            await queuedMessage.Tcs.Task
+                .ConfigureAwait(false);
+        }
+
+        private async ValueTask SendAsyncInternal(
+            object message,
+            Action<ClientToServerMessageMetadata>? metadataSetter,
+            bool requireAcknowledgement,
+            CancellationToken cancellationToken)
+        {
+            string? subscriptionId = null; // For acknowledgment.
 
             if (!IsConnected)
                 throw new InvalidOperationException("Not connected.");
@@ -152,7 +278,7 @@ namespace TypingRealm.Messaging.Client
 
                     if (requireAcknowledgement)
                     {
-                        // Setup subscription for acknowledgement.
+                        // Setup subscription for acknowledgment.
 
                         tcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -173,7 +299,7 @@ namespace TypingRealm.Messaging.Client
 
                     if (requireAcknowledgement)
                     {
-                        // Wait for acknowledgement, and if not received - throw.
+                        // Wait for acknowledgment, and if not received - throw.
 
                         if (tcs == null)
                             throw new InvalidOperationException("Should never happen.");
@@ -206,7 +332,7 @@ namespace TypingRealm.Messaging.Client
             }
         }
 
-        public async ValueTask<TResponse> SendQueryAsync<TResponse>(object message, CancellationToken cancellationToken)
+        /*public async ValueTask<TResponse> SendQueryAsync<TResponse>(object message, CancellationToken cancellationToken)
             where TResponse : class
         {
             var tcs = new TaskCompletionSource<TResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -240,16 +366,16 @@ namespace TypingRealm.Messaging.Client
             {
                 Unsubscribe(subscriptionId!);
             }
-        }
+        }*/
 
         /// <summary>
-        /// Sends message with acknowledgement enabled.
+        /// Sends message with acknowledgment enabled.
         /// </summary>
         public ValueTask SendAsync(object message, CancellationToken cancellationToken)
             => SendWithAcknowledgementAsync(message, cancellationToken);
 
         // I Cannot use SendQuery method because it works only after initial connection has been established.
-        // But we need to have acknowledgement on the level of all messages (like Authentication, that are used during connection stage).
+        // But we need to have acknowledgment on the level of all messages (like Authentication, that are used during connection stage).
         public ValueTask SendWithAcknowledgementAsync(
             object message,
             CancellationToken cancellationToken)
@@ -330,13 +456,12 @@ namespace TypingRealm.Messaging.Client
                             break;
                     }
 
-                    await _dispatcher.DispatchAsync(message, resource.CombinedCts.Token)
-                        .ConfigureAwait(false);
+                    var tasks = _handlers.Values.Select(handler => handler(message))
+                        .Concat(_handlersWithId.Values.Select(handler => handler(message, messageWithMetadata.Metadata.RequestMessageId)))
+                        .Append(_dispatcher.DispatchAsync(message, resource.CombinedCts.Token))
+                        .ToList();
 
-                    await AsyncHelpers.WhenAll(_handlers.Values.Select(handler => handler(message)))
-                        .ConfigureAwait(false);
-
-                    await AsyncHelpers.WhenAll(_handlersWithId.Values.Select(handler => handler(message, messageWithMetadata.Metadata.RequestMessageId)))
+                    await AsyncHelpers.WhenAll(tasks)
                         .ConfigureAwait(false);
                 }
                 catch (Exception exception)
@@ -345,6 +470,7 @@ namespace TypingRealm.Messaging.Client
 
                     // 1. Wait until all Send operations finish (consider canceling local CTS), do not allow any new Send operations to start.
                     IsConnected = false;
+
                     _ = ReconnectAsync().ConfigureAwait(false);
                     return;
                 }
@@ -364,6 +490,12 @@ namespace TypingRealm.Messaging.Client
             if (IsConnected)
                 return;
 
+            if (_processing != null)
+            {
+                await _processing.ConfigureAwait(false);
+            }
+
+            // Also stops Listening (receiving) for messages.
             await resource.DisposeAsync()
                 .ConfigureAwait(false);
 
@@ -378,11 +510,6 @@ namespace TypingRealm.Messaging.Client
                 throw new InvalidOperationException("Connection resource has been erased. Cannot continue.");
 
             return resource;
-        }
-
-        private async ValueTask WaitForReconnectAsync(CancellationToken cancellationToken)
-        {
-            await using var _ = await _reconnectLock.UseWaitAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }
