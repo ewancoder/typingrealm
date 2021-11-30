@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <!-- Install this instead of Microsoft.IdentityModel.* -->
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.9" />
   </ItemGroup>
 
 </Project>
