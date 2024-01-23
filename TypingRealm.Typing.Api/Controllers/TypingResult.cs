@@ -10,7 +10,6 @@ public sealed record TypingResultDao(
 public sealed record TypingResult(
     string Text,
     DateTime StartedTypingAt,
-    decimal StartedTypingPerf,
     DateTime FinishedTypingAt,
     string Timezone,
     int TimezoneOffset,

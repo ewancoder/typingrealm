@@ -1,9 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Npgsql;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace TypingRealm.Typing.Api.Controllers;
 
@@ -11,30 +14,67 @@ namespace TypingRealm.Typing.Api.Controllers;
 [Route("api/typing")]
 public sealed class TypingController : ControllerBase
 {
-    private readonly Dictionary<string, TypingResultDao> _data;
+    private readonly NpgsqlDataSource _db;
 
     public TypingController(Dictionary<string, TypingResultDao> data)
     {
-        _data = data;
+        var builder = new NpgsqlDataSourceBuilder("Host=localhost;Port=5433;Database=typing;Username=postgres;Password=admin;Sslmode=disable");
+        _db = builder.Build();
     }
 
     [HttpGet]
-    public ActionResult<TypingResult> GetTypingResultById(string id)
+    public async Task<ActionResult<TypingResult>> GetTypingResultById(string id)
     {
-        if (!_data.ContainsKey(id))
-            return NotFound();
+        var profileId = User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
 
-        return Ok(_data[id]);
+        using var connection = await _db.OpenConnectionAsync();
+
+        // TODO: Avoid injection attacks.
+        await using (var cmd = new NpgsqlCommand(@"SELECT text, started_typing_at, finished_typing_at, client_timezone, client_timezone_offset, events FROM typing_bundle WHERE id = @id AND profile_id = @profileId", connection))
+        {
+            cmd.Parameters.AddWithValue("@id", Convert.ToInt64(id));
+            cmd.Parameters.AddWithValue("@profileId", profileId);
+            await using (var reader = await cmd.ExecuteReaderAsync())
+            {
+                if (await reader.ReadAsync())
+                {
+                    return new TypingResult(
+                        reader.GetString(0),
+                        reader.GetDateTime(1),
+                        reader.GetDateTime(2),
+                        reader.GetString(3),
+                        reader.GetInt32(4),
+                        JsonSerializer.Deserialize<IEnumerable<TypingEvent>>(reader.GetString(5)));
+                }
+            }
+        }
+
+        return NotFound();
     }
 
     [HttpPost]
-    public ActionResult<TypingResult> LogTypingResult(TypingResult typingResult)
+    public async Task<ActionResult<TypingResult>> LogTypingResult(TypingResult typingResult)
     {
-        var id = Guid.NewGuid().ToString();
-        var user = User;
+        var profileId = User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
 
-        _data.Add(id, new TypingResultDao($"g_{user.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value}", typingResult));
+        using var connection = await _db.OpenConnectionAsync();
 
-        return CreatedAtAction(nameof(GetTypingResultById), new { id }, typingResult);
+        await using (var cmd = new NpgsqlCommand(@"INSERT INTO typing_bundle (submitted_at, text, profile_id, started_typing_at, finished_typing_at, client_timezone, client_timezone_offset, events) VALUES (@submittedAt, @text, @profileId, @startedTypingAt, @finishedTypingAt, @clientTimezone, @clientTimezoneOffset, @events) RETURNING id", connection))
+        {
+            cmd.Parameters.AddWithValue("submittedAt", DateTime.UtcNow);
+            cmd.Parameters.AddWithValue("text", typingResult.Text);
+            cmd.Parameters.AddWithValue("profileId", profileId);
+            cmd.Parameters.AddWithValue("startedTypingAt", typingResult.StartedTypingAt);
+            cmd.Parameters.AddWithValue("finishedTypingAt", typingResult.FinishedTypingAt);
+            cmd.Parameters.AddWithValue("clientTimezone", typingResult.Timezone);
+            cmd.Parameters.AddWithValue("clientTimezoneOffset", typingResult.TimezoneOffset);
+
+            var jsonEvents = cmd.Parameters.Add("events", NpgsqlTypes.NpgsqlDbType.Json);
+            jsonEvents.Value = JsonSerializer.Serialize(typingResult.Events);
+
+            var id = await cmd.ExecuteScalarAsync();
+
+            return CreatedAtAction(nameof(GetTypingResultById), new { id }, typingResult);
+        }
     }
 }
