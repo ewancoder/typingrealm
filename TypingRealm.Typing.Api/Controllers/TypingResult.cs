@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace TypingRealm.Typing.Api.Controllers;
 
@@ -8,6 +9,11 @@ public sealed record TypingResultDao(
 
 public sealed record TypingResult(
     string Text,
+    DateTime StartedTypingAt,
+    decimal StartedTypingPerf,
+    DateTime FinishedTypingAt,
+    string Timezone,
+    int TimezoneOffset,
     IEnumerable<TypingEvent> Events);
 
 public sealed record TypingEvent(
