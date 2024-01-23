@@ -11,6 +11,15 @@ using TypingRealm.Typing.Api.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(o =>
+{
+    o.AddPolicy(name: "cors", policy =>
+    {
+        policy.WithOrigins("https://typingrealm.com", "http://localhost:4200")
+            .WithHeaders(new[] { "Authorization", "Content-Type" });
+    });
+});
+
 builder.Services.AddControllers()
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
@@ -35,6 +44,7 @@ builder.Services.AddRouting(o => o.LowercaseUrls = true);
 
 var app = builder.Build();
 
+app.UseCors("cors");
 app.MapControllers();
 
 await app.RunAsync();
