@@ -23,6 +23,7 @@ public sealed record TypingEvent(
 
 public enum KeyAction
 {
+    None = 0,
     Press = 1,
     Release
 }
