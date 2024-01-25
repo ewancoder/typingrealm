@@ -24,13 +24,38 @@ public sealed class TypingController : ControllerBase
     }
 
     [HttpGet]
+    public async IAsyncEnumerable<TypingSessionInfo> GetAllTypingSessionInfos()
+    {
+        var profileId = User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
+
+        using var connection = await _db.OpenConnectionAsync();
+
+        await using var cmd = new NpgsqlCommand(@"SELECT id, text, started_typing_at, finished_typing_at FROM typing_bundle WHERE profile_id = @profileId ORDER BY started_typing_at DESC", connection);
+        cmd.Parameters.AddWithValue("@profileId", profileId);
+
+        await using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            var startedTypingAt = reader.GetDateTime(2);
+            var finishedTypingAt = reader.GetDateTime(3);
+            var lengthSeconds = Convert.ToDecimal((finishedTypingAt - startedTypingAt).TotalSeconds);
+
+            yield return new TypingSessionInfo(
+                reader.GetInt64(0).ToString(),
+                reader.GetString(1),
+                startedTypingAt,
+                lengthSeconds);
+        }
+    }
+
+    [HttpGet]
+    [Route("{id}")]
     public async Task<ActionResult<TypingResult>> GetTypingResultById(string id)
     {
         var profileId = User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
 
         using var connection = await _db.OpenConnectionAsync();
 
-        // TODO: Avoid injection attacks.
         await using (var cmd = new NpgsqlCommand(@"SELECT text, started_typing_at, finished_typing_at, client_timezone, client_timezone_offset, events FROM typing_bundle WHERE id = @id AND profile_id = @profileId", connection))
         {
             cmd.Parameters.AddWithValue("@id", Convert.ToInt64(id));

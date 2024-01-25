@@ -21,6 +21,12 @@ public sealed record TypingEvent(
     int Index,
     KeyAction KeyAction);
 
+public sealed record TypingSessionInfo(
+    string Id,
+    string Text,
+    DateTime StartedTypingAt,
+    decimal LengthSeconds);
+
 public enum KeyAction
 {
     None = 0,
