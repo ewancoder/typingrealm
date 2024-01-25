@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Npgsql;
 using System;
 using System.Collections.Generic;
@@ -16,9 +17,11 @@ public sealed class TypingController : ControllerBase
 {
     private readonly NpgsqlDataSource _db;
 
-    public TypingController(Dictionary<string, TypingResultDao> data)
+    public TypingController(
+        IConfiguration configuration,
+        Dictionary<string, TypingResultDao> data)
     {
-        var builder = new NpgsqlDataSourceBuilder("Host=localhost;Port=5433;Database=typing;Username=postgres;Password=admin;Sslmode=disable");
+        var builder = new NpgsqlDataSourceBuilder(configuration.GetConnectionString("DataConnectionString"));
         _db = builder.Build();
     }
 

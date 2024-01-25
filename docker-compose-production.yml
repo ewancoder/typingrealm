@@ -1,0 +1,31 @@
+version: "3.8"
+
+networks:
+  default:
+    name: typingrealm
+
+services:
+  typingrealm-typing:
+    image: ${DOCKER_REGISTRY-}typingrealm-typing
+    container_name: typingrealm-typing
+    build:
+      context: .
+      dockerfile: TypingRealm.Typing.Api/Dockerfile-production
+    restart: unless-stopped
+    mem_limit: 1g
+    mem_reservation: 750m
+    env_file:
+      - .env.production.typing
+
+  typingrealm-typing-postgres:
+    image: postgres
+    container_name: typingrealm-typing-postgres
+    ports:
+      - 10132:5432
+    volumes:
+      - ./infrastructure-data/prod/typing/postgres:/var/lib/postgresql/data
+    restart: unless-stopped
+    mem_limit: 1g
+    mem_reservation: 750m
+    env_file:
+      - .env.production.typing

@@ -1,0 +1,15 @@
+**/.dockerignore
+**/docker-compose*
+**/Dockerfile*
+**/.git
+**/.gitignore
+**/.vs
+**/*.*proj.user
+**/bin
+**/obj
+LICENSE
+README.md
+
+*NCrunch*
+/infrastructure-data/
+**/logs/
