@@ -17,9 +17,7 @@ public sealed class TypingController : ControllerBase
 {
     private readonly NpgsqlDataSource _db;
 
-    public TypingController(
-        IConfiguration configuration,
-        Dictionary<string, TypingResultDao> data)
+    public TypingController(IConfiguration configuration)
     {
         var builder = new NpgsqlDataSourceBuilder(configuration.GetConnectionString("DataConnectionString"));
         _db = builder.Build();
@@ -37,18 +35,18 @@ public sealed class TypingController : ControllerBase
         {
             cmd.Parameters.AddWithValue("@id", Convert.ToInt64(id));
             cmd.Parameters.AddWithValue("@profileId", profileId);
-            await using (var reader = await cmd.ExecuteReaderAsync())
+
+            await using var reader = await cmd.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
             {
-                if (await reader.ReadAsync())
-                {
-                    return new TypingResult(
-                        reader.GetString(0),
-                        reader.GetDateTime(1),
-                        reader.GetDateTime(2),
-                        reader.GetString(3),
-                        reader.GetInt32(4),
-                        JsonSerializer.Deserialize<IEnumerable<TypingEvent>>(reader.GetString(5)));
-                }
+                return new TypingResult(
+                    reader.GetString(0),
+                    reader.GetDateTime(1),
+                    reader.GetDateTime(2),
+                    reader.GetString(3),
+                    reader.GetInt32(4),
+                    JsonSerializer.Deserialize<IEnumerable<TypingEvent>>(reader.GetString(5))
+                        ?? throw new InvalidOperationException("Could not deserialize events."));
             }
         }
 
@@ -62,22 +60,21 @@ public sealed class TypingController : ControllerBase
 
         using var connection = await _db.OpenConnectionAsync();
 
-        await using (var cmd = new NpgsqlCommand(@"INSERT INTO typing_bundle (submitted_at, text, profile_id, started_typing_at, finished_typing_at, client_timezone, client_timezone_offset, events) VALUES (@submittedAt, @text, @profileId, @startedTypingAt, @finishedTypingAt, @clientTimezone, @clientTimezoneOffset, @events) RETURNING id", connection))
-        {
-            cmd.Parameters.AddWithValue("submittedAt", DateTime.UtcNow);
-            cmd.Parameters.AddWithValue("text", typingResult.Text);
-            cmd.Parameters.AddWithValue("profileId", profileId);
-            cmd.Parameters.AddWithValue("startedTypingAt", typingResult.StartedTypingAt);
-            cmd.Parameters.AddWithValue("finishedTypingAt", typingResult.FinishedTypingAt);
-            cmd.Parameters.AddWithValue("clientTimezone", typingResult.Timezone);
-            cmd.Parameters.AddWithValue("clientTimezoneOffset", typingResult.TimezoneOffset);
+        await using var cmd = new NpgsqlCommand(@"INSERT INTO typing_bundle (submitted_at, text, profile_id, started_typing_at, finished_typing_at, client_timezone, client_timezone_offset, events) VALUES (@submittedAt, @text, @profileId, @startedTypingAt, @finishedTypingAt, @clientTimezone, @clientTimezoneOffset, @events) RETURNING id", connection);
 
-            var jsonEvents = cmd.Parameters.Add("events", NpgsqlTypes.NpgsqlDbType.Json);
-            jsonEvents.Value = JsonSerializer.Serialize(typingResult.Events);
+        cmd.Parameters.AddWithValue("submittedAt", DateTime.UtcNow);
+        cmd.Parameters.AddWithValue("text", typingResult.Text);
+        cmd.Parameters.AddWithValue("profileId", profileId);
+        cmd.Parameters.AddWithValue("startedTypingAt", typingResult.StartedTypingAt);
+        cmd.Parameters.AddWithValue("finishedTypingAt", typingResult.FinishedTypingAt);
+        cmd.Parameters.AddWithValue("clientTimezone", typingResult.Timezone);
+        cmd.Parameters.AddWithValue("clientTimezoneOffset", typingResult.TimezoneOffset);
 
-            var id = await cmd.ExecuteScalarAsync();
+        var jsonEvents = cmd.Parameters.Add("events", NpgsqlTypes.NpgsqlDbType.Json);
+        jsonEvents.Value = JsonSerializer.Serialize(typingResult.Events);
 
-            return CreatedAtAction(nameof(GetTypingResultById), new { id }, typingResult);
-        }
+        var id = await cmd.ExecuteScalarAsync();
+
+        return CreatedAtAction(nameof(GetTypingResultById), new { id }, typingResult);
     }
 }
