@@ -1,6 +1,7 @@
 version: "3.8"
 
 networks:
+  typingrealm-typing-net:
   default:
     name: typingrealm
 
@@ -8,6 +9,9 @@ services:
   typingrealm-typing:
     image: ${DOCKER_REGISTRY-}typingrealm-typing
     container_name: typingrealm-typing
+    networks:
+      - default
+      - typingrealm-typing-net
     build:
       context: .
       dockerfile: TypingRealm.Typing.Api/Dockerfile-production
@@ -20,6 +24,8 @@ services:
   typingrealm-typing-postgres:
     image: postgres
     container_name: typingrealm-typing-postgres
+    networks:
+      - typingrealm-typing-net
     ports:
       - 10132:5432
     volumes:
