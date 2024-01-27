@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Npgsql;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Security.Claims;
 using System.Text.Json;
@@ -81,6 +82,16 @@ public sealed class TypingController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<TypingResult>> LogTypingResult(TypingResult typingResult)
     {
+        // Validate inputs against attacks:
+        if (typingResult.Text.Length > 100_000)
+            return BadRequest("Text cannot be longer than 100.000 characters.");
+
+        if (typingResult.Timezone.Length > 1000)
+            return BadRequest("Timezone cannot be longer than 1000 characters.");
+
+        if (typingResult.Events.Any(x => x.Key.Length > 1000))
+            return BadRequest("Event keys value cannot be longer than 1000 characters.");
+
         var profileId = User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
 
         using var connection = await _db.OpenConnectionAsync();
