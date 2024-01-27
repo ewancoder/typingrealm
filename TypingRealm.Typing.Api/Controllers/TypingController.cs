@@ -80,7 +80,7 @@ public sealed class TypingController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<TypingResult>> LogTypingResult(TypingResult typingResult)
+    public async Task<ActionResult<TypingSessionInfo>> LogTypingResult(TypingResult typingResult)
     {
         // Validate inputs against attacks:
         if (typingResult.Text.Length > 100_000)
@@ -109,9 +109,18 @@ public sealed class TypingController : ControllerBase
         var jsonEvents = cmd.Parameters.Add("events", NpgsqlTypes.NpgsqlDbType.Json);
         jsonEvents.Value = JsonSerializer.Serialize(typingResult.Events);
 
-        var id = await cmd.ExecuteScalarAsync();
+        var id = await cmd.ExecuteScalarAsync()
+            ?? throw new InvalidOperationException("Database insert returned null result.");
 
-        return CreatedAtAction(nameof(GetTypingResultById), new { id }, typingResult);
+        var startedTypingAt = typingResult.StartedTypingAt;
+        var finishedTypingAt = typingResult.FinishedTypingAt;
+        var lengthSeconds = Convert.ToDecimal((finishedTypingAt - startedTypingAt).TotalSeconds);
+
+        var info = new TypingSessionInfo(
+            id.ToString() ?? throw new InvalidOperationException("Database insert returned null result"),
+            typingResult.Text, startedTypingAt, lengthSeconds);
+
+        return CreatedAtAction(nameof(GetTypingResultById), new { id }, info);
     }
 
     [HttpDelete]
