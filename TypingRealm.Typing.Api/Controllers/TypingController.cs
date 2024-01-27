@@ -30,7 +30,7 @@ public sealed class TypingController : ControllerBase
 
         using var connection = await _db.OpenConnectionAsync();
 
-        await using var cmd = new NpgsqlCommand(@"SELECT id, text, started_typing_at, finished_typing_at FROM typing_bundle WHERE profile_id = @profileId ORDER BY started_typing_at DESC", connection);
+        await using var cmd = new NpgsqlCommand(@"SELECT id, text, started_typing_at, finished_typing_at FROM typing_bundle WHERE profile_id = @profileId AND is_archived = false ORDER BY started_typing_at DESC", connection);
         cmd.Parameters.AddWithValue("@profileId", profileId);
 
         await using var reader = await cmd.ExecuteReaderAsync();
@@ -56,7 +56,7 @@ public sealed class TypingController : ControllerBase
 
         using var connection = await _db.OpenConnectionAsync();
 
-        await using (var cmd = new NpgsqlCommand(@"SELECT text, started_typing_at, finished_typing_at, client_timezone, client_timezone_offset, events FROM typing_bundle WHERE id = @id AND profile_id = @profileId", connection))
+        await using (var cmd = new NpgsqlCommand(@"SELECT text, started_typing_at, finished_typing_at, client_timezone, client_timezone_offset, events FROM typing_bundle WHERE id = @id AND profile_id = @profileId AND is_archived = false", connection))
         {
             cmd.Parameters.AddWithValue("@id", Convert.ToInt64(id));
             cmd.Parameters.AddWithValue("@profileId", profileId);
@@ -101,5 +101,43 @@ public sealed class TypingController : ControllerBase
         var id = await cmd.ExecuteScalarAsync();
 
         return CreatedAtAction(nameof(GetTypingResultById), new { id }, typingResult);
+    }
+
+    [HttpDelete]
+    [Route("{id}")]
+    public async Task<ActionResult> ArchiveTypingSessionById(string id)
+    {
+        var profileId = User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
+
+        using var connection = await _db.OpenConnectionAsync();
+
+        await using var cmd = new NpgsqlCommand(@"UPDATE typing_bundle SET is_archived = true WHERE id = @id AND profile_id = @profileId AND is_archived = false", connection);
+        cmd.Parameters.AddWithValue("@id", Convert.ToInt64(id));
+        cmd.Parameters.AddWithValue("@profileId", profileId);
+
+        var affectedRows = await cmd.ExecuteNonQueryAsync();
+        if (affectedRows == 0)
+            return NotFound();
+
+        return Ok();
+    }
+
+    [HttpPost]
+    [Route("{id}/rollback-archive")]
+    public async Task<ActionResult> RollbackArchiveTypingSessionById(string id)
+    {
+        var profileId = User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
+
+        using var connection = await _db.OpenConnectionAsync();
+
+        await using var cmd = new NpgsqlCommand(@"UPDATE typing_bundle SET is_archived = false WHERE id = @id AND profile_id = @profileId AND is_archived = true", connection);
+        cmd.Parameters.AddWithValue("@id", Convert.ToInt64(id));
+        cmd.Parameters.AddWithValue("@profileId", profileId);
+
+        var affectedRows = await cmd.ExecuteNonQueryAsync();
+        if (affectedRows == 0)
+            return NotFound();
+
+        return Ok();
     }
 }

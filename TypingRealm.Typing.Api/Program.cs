@@ -16,6 +16,7 @@ builder.Services.AddCors(o =>
     o.AddPolicy(name: "cors", policy =>
     {
         policy.WithOrigins("https://typingrealm.com", "http://localhost:4200")
+            .AllowAnyMethod() // TODO: allow only specific methods; this was done because delete wasn't allowed by default
             .WithHeaders("Authorization", "Content-Type");
     });
 });
