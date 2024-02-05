@@ -7,6 +7,8 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Directory.Build.props", "."]
+COPY ["TypingRealm.ApiHost/TypingRealm.ApiHost.csproj", "TypingRealm.ApiHost/"]
+COPY ["TypingRealm.Framework/TypingRealm.Framework.csproj", "TypingRealm.Framework/"]
 COPY ["TypingRealm.Typing.Api/TypingRealm.Typing.Api.csproj", "TypingRealm.Typing.Api/"]
 COPY ["TypingRealm.Typing.DataAccess/TypingRealm.Typing.DataAccess.csproj", "TypingRealm.Typing.DataAccess/"]
 COPY ["TypingRealm.Typing/TypingRealm.Typing.csproj", "TypingRealm.Typing/"]

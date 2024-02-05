@@ -1,12 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
-    <PackageReference Include="Google.Apis.Auth" Version="1.66.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.1" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\TypingRealm.ApiHost\TypingRealm.ApiHost.csproj" />
     <ProjectReference Include="..\TypingRealm.Typing.DataAccess\TypingRealm.Typing.DataAccess.csproj" />
     <ProjectReference Include="..\TypingRealm.Typing\TypingRealm.Typing.csproj" />
   </ItemGroup>
