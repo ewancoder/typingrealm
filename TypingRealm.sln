@@ -11,6 +11,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Directory.Build.props = Directory.Build.props
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypingRealm.Typing", "TypingRealm.Typing\TypingRealm.Typing.csproj", "{51FF857D-2D7C-490A-80D7-3A23164D842F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypingRealm.Typing.DataAccess", "TypingRealm.Typing.DataAccess\TypingRealm.Typing.DataAccess.csproj", "{5476D36A-B2AD-4C3E-9064-F058B07950A1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{D78B1052-6375-4694-87C8-0BDAF604C56E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D78B1052-6375-4694-87C8-0BDAF604C56E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D78B1052-6375-4694-87C8-0BDAF604C56E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51FF857D-2D7C-490A-80D7-3A23164D842F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51FF857D-2D7C-490A-80D7-3A23164D842F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51FF857D-2D7C-490A-80D7-3A23164D842F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51FF857D-2D7C-490A-80D7-3A23164D842F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5476D36A-B2AD-4C3E-9064-F058B07950A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5476D36A-B2AD-4C3E-9064-F058B07950A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5476D36A-B2AD-4C3E-9064-F058B07950A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5476D36A-B2AD-4C3E-9064-F058B07950A1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -302,3 +302,9 @@ dotnet_diagnostic.CA1040.severity = none
 # CA2007: Consider calling ConfigureAwait on the awaited task
 dotnet_diagnostic.CA2007.severity = none
 
+# === Data Access projects for specific domain ===
+[**.DataAccess/**]
+
+# CA2007: Consider calling ConfigureAwait on the awaited task
+dotnet_diagnostic.CA2007.severity = none
+

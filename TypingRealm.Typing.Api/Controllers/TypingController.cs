@@ -1,14 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Npgsql;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics.Tracing;
 using System.Linq;
-using System.Security.Claims;
-using System.Text.Json;
 using System.Threading.Tasks;
+using TypingRealm.Typing.DataAccess;
 
 namespace TypingRealm.Typing.Api.Controllers;
 
@@ -16,67 +11,29 @@ namespace TypingRealm.Typing.Api.Controllers;
 [Route("api/typing")]
 public sealed class TypingController : ControllerBase
 {
-    private readonly NpgsqlDataSource _db;
+    private readonly ITypingRepository _typingRepository;
 
-    public TypingController(IConfiguration configuration)
+    public TypingController(ITypingRepository typingRepository)
     {
-        var builder = new NpgsqlDataSourceBuilder(configuration.GetConnectionString("DataConnectionString"));
-        _db = builder.Build();
+        _typingRepository = typingRepository;
     }
 
     [HttpGet]
-    public async IAsyncEnumerable<TypingSessionInfo> GetAllTypingSessionInfos()
+    public ValueTask<IEnumerable<TypingSessionInfo>> GetAllTypingSessionInfos()
     {
-        var profileId = User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
-
-        using var connection = await _db.OpenConnectionAsync();
-
-        await using var cmd = new NpgsqlCommand(@"SELECT id, text, started_typing_at, finished_typing_at FROM typing_bundle WHERE profile_id = @profileId AND is_archived = false ORDER BY started_typing_at DESC", connection);
-        cmd.Parameters.AddWithValue("@profileId", profileId);
-
-        await using var reader = await cmd.ExecuteReaderAsync();
-        while (await reader.ReadAsync())
-        {
-            var startedTypingAt = reader.GetDateTime(2);
-            var finishedTypingAt = reader.GetDateTime(3);
-            var lengthSeconds = Convert.ToDecimal((finishedTypingAt - startedTypingAt).TotalSeconds);
-
-            yield return new TypingSessionInfo(
-                reader.GetInt64(0).ToString(),
-                reader.GetString(1),
-                startedTypingAt,
-                lengthSeconds);
-        }
+        return _typingRepository.GetAllTypingSessionInfosAsync();
     }
 
     [HttpGet]
     [Route("{id}")]
     public async Task<ActionResult<TypingResult>> GetTypingResultById(string id)
     {
-        var profileId = User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
+        var result = await _typingRepository.GetTypingResultByIdAsync(id);
 
-        using var connection = await _db.OpenConnectionAsync();
+        if (result == null)
+            return NotFound();
 
-        await using (var cmd = new NpgsqlCommand(@"SELECT text, started_typing_at, finished_typing_at, client_timezone, client_timezone_offset, events FROM typing_bundle WHERE id = @id AND profile_id = @profileId AND is_archived = false", connection))
-        {
-            cmd.Parameters.AddWithValue("@id", Convert.ToInt64(id));
-            cmd.Parameters.AddWithValue("@profileId", profileId);
-
-            await using var reader = await cmd.ExecuteReaderAsync();
-            if (await reader.ReadAsync())
-            {
-                return new TypingResult(
-                    reader.GetString(0),
-                    reader.GetDateTime(1),
-                    reader.GetDateTime(2),
-                    reader.GetString(3),
-                    reader.GetInt32(4),
-                    JsonSerializer.Deserialize<IEnumerable<TypingEvent>>(reader.GetString(5))
-                        ?? throw new InvalidOperationException("Could not deserialize events."));
-            }
-        }
-
-        return NotFound();
+        return Ok(result);
     }
 
     [HttpPost]
@@ -92,51 +49,15 @@ public sealed class TypingController : ControllerBase
         if (typingResult.Events.Any(x => x.Key.Length > 1000))
             return BadRequest("Event keys value cannot be longer than 1000 characters.");
 
-        var profileId = User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
-
-        using var connection = await _db.OpenConnectionAsync();
-
-        await using var cmd = new NpgsqlCommand(@"INSERT INTO typing_bundle (submitted_at, text, profile_id, started_typing_at, finished_typing_at, client_timezone, client_timezone_offset, events) VALUES (@submittedAt, @text, @profileId, @startedTypingAt, @finishedTypingAt, @clientTimezone, @clientTimezoneOffset, @events) RETURNING id", connection);
-
-        cmd.Parameters.AddWithValue("submittedAt", DateTime.UtcNow);
-        cmd.Parameters.AddWithValue("text", typingResult.Text);
-        cmd.Parameters.AddWithValue("profileId", profileId);
-        cmd.Parameters.AddWithValue("startedTypingAt", typingResult.StartedTypingAt);
-        cmd.Parameters.AddWithValue("finishedTypingAt", typingResult.FinishedTypingAt);
-        cmd.Parameters.AddWithValue("clientTimezone", typingResult.Timezone);
-        cmd.Parameters.AddWithValue("clientTimezoneOffset", typingResult.TimezoneOffset);
-
-        var jsonEvents = cmd.Parameters.Add("events", NpgsqlTypes.NpgsqlDbType.Json);
-        jsonEvents.Value = JsonSerializer.Serialize(typingResult.Events);
-
-        var id = await cmd.ExecuteScalarAsync()
-            ?? throw new InvalidOperationException("Database insert returned null result.");
-
-        var startedTypingAt = typingResult.StartedTypingAt;
-        var finishedTypingAt = typingResult.FinishedTypingAt;
-        var lengthSeconds = Convert.ToDecimal((finishedTypingAt - startedTypingAt).TotalSeconds);
-
-        var info = new TypingSessionInfo(
-            id.ToString() ?? throw new InvalidOperationException("Database insert returned null result"),
-            typingResult.Text, startedTypingAt, lengthSeconds);
-
-        return CreatedAtAction(nameof(GetTypingResultById), new { id }, info);
+        var info = await _typingRepository.SaveTypingResultAsync(typingResult);
+        return CreatedAtAction(nameof(GetTypingResultById), new { info.Id }, info);
     }
 
     [HttpDelete]
     [Route("{id}")]
     public async Task<ActionResult> ArchiveTypingSessionById(string id)
     {
-        var profileId = User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
-
-        using var connection = await _db.OpenConnectionAsync();
-
-        await using var cmd = new NpgsqlCommand(@"UPDATE typing_bundle SET is_archived = true WHERE id = @id AND profile_id = @profileId AND is_archived = false", connection);
-        cmd.Parameters.AddWithValue("@id", Convert.ToInt64(id));
-        cmd.Parameters.AddWithValue("@profileId", profileId);
-
-        var affectedRows = await cmd.ExecuteNonQueryAsync();
-        if (affectedRows == 0)
+        if (!await _typingRepository.ArchiveTypingSessionByIdAsync(id))
             return NotFound();
 
         return Ok();
@@ -146,16 +67,7 @@ public sealed class TypingController : ControllerBase
     [Route("{id}/rollback-archive")]
     public async Task<ActionResult> RollbackArchiveTypingSessionById(string id)
     {
-        var profileId = User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
-
-        using var connection = await _db.OpenConnectionAsync();
-
-        await using var cmd = new NpgsqlCommand(@"UPDATE typing_bundle SET is_archived = false WHERE id = @id AND profile_id = @profileId AND is_archived = true", connection);
-        cmd.Parameters.AddWithValue("@id", Convert.ToInt64(id));
-        cmd.Parameters.AddWithValue("@profileId", profileId);
-
-        var affectedRows = await cmd.ExecuteNonQueryAsync();
-        if (affectedRows == 0)
+        if (!await _typingRepository.RollbackArchiveTypingSessionByIdAsync(id))
             return NotFound();
 
         return Ok();

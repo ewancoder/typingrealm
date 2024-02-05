@@ -1,11 +1,14 @@
 ﻿using Google.Apis.Auth;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using System.Collections.Generic;
+using System;
+using System.Linq;
+using System.Security.Claims;
 using System.Text.Json.Serialization;
-using TypingRealm.Typing.Api.Controllers;
+using TypingRealm.Typing.DataAccess;
 [assembly: ApiController]
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,8 +43,10 @@ builder.Services.AddAuthentication()
         };
     });
 
-builder.Services.AddSingleton(new Dictionary<string, TypingResultDao>());
 builder.Services.AddRouting(o => o.LowercaseUrls = true);
+builder.Services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddTransient<IAuthenticationContext, AuthenticationContext>();
+builder.Services.AddScoped<ITypingRepository, TypingRepository>();
 
 var app = builder.Build();
 
@@ -49,3 +54,19 @@ app.UseCors("cors");
 app.MapControllers();
 
 await app.RunAsync();
+
+public sealed class AuthenticationContext : IAuthenticationContext
+{
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    public AuthenticationContext(IHttpContextAccessor httpContextAccessor)
+    {
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+    public string GetUserProfileId()
+    {
+        return _httpContextAccessor.HttpContext?.User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value
+            ?? throw new InvalidOperationException("User is not authenticated.");
+    }
+}

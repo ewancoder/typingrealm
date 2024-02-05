@@ -6,7 +6,10 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
+COPY ["Directory.Build.props", "."]
 COPY ["TypingRealm.Typing.Api/TypingRealm.Typing.Api.csproj", "TypingRealm.Typing.Api/"]
+COPY ["TypingRealm.Typing.DataAccess/TypingRealm.Typing.DataAccess.csproj", "TypingRealm.Typing.DataAccess/"]
+COPY ["TypingRealm.Typing/TypingRealm.Typing.csproj", "TypingRealm.Typing/"]
 RUN dotnet restore "./TypingRealm.Typing.Api/TypingRealm.Typing.Api.csproj"
 COPY . .
 WORKDIR "/src/TypingRealm.Typing.Api"
