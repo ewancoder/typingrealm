@@ -6,9 +6,24 @@ networks:
     name: typingrealm
 
 services:
-  typingrealm-typing:
+  typingrealm-typing-1:
     image: ${DOCKER_REGISTRY-}typingrealm-typing
-    container_name: typingrealm-typing
+    container_name: typingrealm-typing-1
+    networks:
+      - default
+      - typingrealm-typing-net
+    build:
+      context: .
+      dockerfile: TypingRealm.Typing.Api/Dockerfile-production
+    restart: unless-stopped
+    mem_limit: 1g
+    mem_reservation: 750m
+    env_file:
+      - .env.production.typing
+
+  typingrealm-typing-2:
+    image: ${DOCKER_REGISTRY-}typingrealm-typing
+    container_name: typingrealm-typing-2
     networks:
       - default
       - typingrealm-typing-net
