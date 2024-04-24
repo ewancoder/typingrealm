@@ -56,7 +56,7 @@ services:
     image: postgres
     container_name: typingrealm-typing-postgres
     ports:
-      - 10132:5432
+      - 10132:5432 # Port shouldn't be exposed in production.
     volumes:
       - ./infrastructure-data/prod/typing/postgres:/var/lib/postgresql/data
     restart: unless-stopped
