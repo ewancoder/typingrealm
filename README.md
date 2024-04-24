@@ -12,16 +12,18 @@ docker-compose -f docker-compose-production.yml up --build
 
 As of now, this file runs the project in localhost configuration (not the production configuration).
 
-You can then access the web page at:
-
-```
-https://localhost
-```
-
-and APIs at:
-
-```
-https://api.localhost/xxx
-```
+You can access the web page at `https://localhost` and APIs at `https://api.localhost/...` (for example, Typing api at `https://api.localhost/typing`).
 
 Read `Caddyfile` for detailed reverse proxy mappings for different APIs.
+
+## Running / Debugging the project locally
+
+If you want to run the project in Debug mode, open `backend/TypingRealm.sln` solution and run the following projects:
+
+`TypingRealm.Typing.Api`
+
+Then separately, run `http-server -p 4200` in `frontend/src` folder.
+
+You can access the web page at `http://localhost:4200` and APIs at `http://localhost:5000`.
+
+> Note that currentyly you can access only Typing API at 5000 port because we only have one API. When we will have multiple APIs, they'll be accessible at 5001, 5002 etc ports or at some different ports, it will be listed in the documentation here.
