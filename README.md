@@ -7,7 +7,7 @@ This is a analytics and training tool to gather statistics and improve your typi
 Just run in the root folder
 
 ```
-docker-compose -f docker-compose-production.yml up --build
+docker-compose -f docker-compose-production.yml up --build -d
 ```
 
 As of now, this file runs the project in localhost configuration (not the production configuration).
