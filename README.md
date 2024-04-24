@@ -26,4 +26,6 @@ Then separately, run `http-server -p 4200` in `frontend/src` folder.
 
 You can access the web page at `http://localhost:4200` and APIs at `http://localhost:5000`.
 
+> Note that `appsettings.json` has connection strings to infrastructure resources (like Postgresql) which my default use the same ports as production (local) configuration uses. This means that you need to first start the project using docker-compose so that all resources are started, and only then run Visual Studio in debugging mode so it will be able to use those resources. Altetrnatively, you might want to tweak `appsettings.json` files to use your own versions of DBs etc.
+
 > Note that currentyly you can access only Typing API at 5000 port because we only have one API. When we will have multiple APIs, they'll be accessible at 5001, 5002 etc ports or at some different ports, it will be listed in the documentation here.
