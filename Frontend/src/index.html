@@ -1,0 +1,24 @@
+<html>
+  <head>
+    <title>Typing Realm</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://accounts.google.com/gsi/client" async></script>
+  </head>
+  <body class="non-scrollable">
+    <div id="input-area" class="hidden">
+      <textarea id="input"></textarea>
+      <button class="submit-button" onclick="submitText()">Start</button>
+    </div>
+    <div id="countdown"></div>
+    <div id="text"></div>
+    <div id="replay"></div>
+    <table id="sessions"></table>
+    <div id="authentication-modal" class="invisible modal hidden">
+      <div class="blur"></div>
+      <div id="authentication"></div>
+    </div>
+    <script type="module" src="main.js" defer></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  </body>
+</html>
