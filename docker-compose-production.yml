@@ -39,6 +39,7 @@ services:
     mem_reservation: 750m
     env_file:
       - .env.production.typing
+      - secrets.env
 
   typingrealm-typing-2:
     image: ${DOCKER_REGISTRY-}typingrealm-typing
@@ -51,6 +52,7 @@ services:
     mem_reservation: 750m
     env_file:
       - .env.production.typing
+      - secrets.env
 
   typingrealm-typing-postgres:
     image: postgres
