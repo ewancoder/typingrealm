@@ -34,7 +34,7 @@ public sealed class TextController : ControllerBase
             return BadRequest($"Length should not exceed {MaxTextLength} characters.");
 
         if (theme?.Length > 20)
-            theme = theme?[..20];
+            theme = theme[..20];
 
         var themeString = theme?.Length > 0
             ? $", theme based on '{theme}'"
