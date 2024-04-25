@@ -25,7 +25,7 @@ public sealed class TextController : ControllerBase
 
     [HttpGet]
     [Route("generate")]
-    public async ValueTask<ActionResult<string>> GenerateText(int length)
+    public async ValueTask<ActionResult<string>> GenerateText(int length, string? theme)
     {
         if (length <= 10)
             return BadRequest($"Length should be at least 10 characters long.");
@@ -33,18 +33,25 @@ public sealed class TextController : ControllerBase
         if (length > MaxTextLength)
             return BadRequest($"Length should not exceed {MaxTextLength} characters.");
 
+        if (theme?.Length > 20)
+            theme = theme?[..20];
+
+        var themeString = theme?.Length > 0
+            ? $", theme based on '{theme}'"
+            : string.Empty;
+
         var options = new ChatCompletionsOptions
         {
             DeploymentName = "gpt-3.5-turbo",
             Messages =
             {
-                new ChatRequestSystemMessage("Generate text without any ambient info"),
-                new ChatRequestUserMessage($"Generate meaningful thematic text {length} characters long, to train typing across whole keyboard decently spread out")
+                new ChatRequestSystemMessage($"Generate text without any ambient info, {length} characters long"),
+                new ChatRequestUserMessage($"Generate meaningful thematic text to train typing across whole keyboard decently spread out{themeString}")
             }
         };
 
         var response = await _openAiClient.GetChatCompletionsAsync(options);
         var responseMessage = response.Value.Choices[0].Message;
-        return responseMessage.Content;
+        return responseMessage.Content[..Math.Min(responseMessage.Content.Length, length)];
     }
 }

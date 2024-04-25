@@ -3,6 +3,8 @@ import { createReplay } from './replay.js';
 import { notifier } from './notifier.js';
 import { initializeSessions } from './typing-sessions.js';
 import { auth } from './auth.js';
+import { http } from './http.js';
+import { config } from './config.js';
 import './google-auth.js'; // Sets up google auth.
 
 // Initialize authentication.
@@ -57,6 +59,27 @@ window.submitText = async function submitText() {
 
     // In future we might generate texts on the server side.
     const text = await getNextText();
+
+    typingState.prepareText(text);
+
+    replay.stop();
+
+    hideControls();
+}
+
+window.generateText = async function generateText() {
+    let text = null;
+    try {
+        let content = await http.get(`${config.textApiUrl}/generate?length=300&theme=${inputElement.value.trim()}`);
+        text = await content.text();
+    } catch {
+        notifier.alertError('Could not generate a new text.');
+        return;
+    }
+    if (text === null || text === undefined || text == '') {
+        notifier.alertError('Could not generate a new text.');
+        return;
+    }
 
     typingState.prepareText(text);
 
