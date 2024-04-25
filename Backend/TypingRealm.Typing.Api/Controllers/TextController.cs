@@ -38,15 +38,15 @@ public sealed class TextController : ControllerBase
 
         var themeString = theme?.Length > 0
             ? $", theme based on '{theme}'"
-            : string.Empty;
+            : ", random theme of your choosing";
 
         var options = new ChatCompletionsOptions
         {
             DeploymentName = "gpt-3.5-turbo",
             Messages =
             {
-                new ChatRequestSystemMessage($"Generate text without any ambient info, {length} characters long"),
-                new ChatRequestUserMessage($"Generate meaningful thematic text to train typing across whole keyboard decently spread out{themeString}")
+                new ChatRequestSystemMessage($"Generate text without any ambient info, {length} characters long, for training typing, decently spread out across whole keyboard"),
+                new ChatRequestUserMessage($"Generate meaningful thematic text{themeString}")
             }
         };
 
