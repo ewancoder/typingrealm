@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
@@ -84,7 +85,12 @@ public sealed class TypingRepository : ITypingRepository
 
         using var connection = await _db.OpenConnectionAsync();
 
-        await using var cmd = new NpgsqlCommand(@"SELECT text, started_typing_at, finished_typing_at, client_timezone, client_timezone_offset, events FROM typing_bundle WHERE id = @id AND profile_id = @profileId AND is_archived = false", connection);
+        await using var cmd = new NpgsqlCommand(@"
+SELECT text, started_typing_at, finished_typing_at, client_timezone, client_timezone_offset, events, theme, for_training
+FROM typing_bundle
+LEFT JOIN text_metadata
+ON id = typing_bundle_id
+WHERE id = @id AND profile_id = @profileId AND is_archived = false", connection);
         cmd.Parameters.AddWithValue("@id", Convert.ToInt64(id));
         cmd.Parameters.AddWithValue("@profileId", profileId);
 
@@ -98,7 +104,8 @@ public sealed class TypingRepository : ITypingRepository
                 reader.GetString(3),
                 reader.GetInt32(4),
                 JsonSerializer.Deserialize<IEnumerable<TypingEvent>>(reader.GetString(5))
-                    ?? throw new InvalidOperationException("Could not deserialize events."));
+                    ?? throw new InvalidOperationException("Could not deserialize events."),
+                CreateMetadata(reader));
         }
 
         return null;
@@ -124,29 +131,67 @@ public sealed class TypingRepository : ITypingRepository
         var profileId = _authenticationContext.GetUserProfileId();
 
         using var connection = await _db.OpenConnectionAsync();
+        using var transaction = await connection.BeginTransactionAsync();
 
-        await using var cmd = new NpgsqlCommand(@"INSERT INTO typing_bundle (submitted_at, text, profile_id, started_typing_at, finished_typing_at, client_timezone, client_timezone_offset, events) VALUES (@submittedAt, @text, @profileId, @startedTypingAt, @finishedTypingAt, @clientTimezone, @clientTimezoneOffset, @events) RETURNING id", connection);
+        string id;
+        DateTime startedTypingAt;
+        decimal lengthSeconds;
+        {
+            await using var cmd = new NpgsqlCommand(@"INSERT INTO typing_bundle (submitted_at, text, profile_id, started_typing_at, finished_typing_at, client_timezone, client_timezone_offset, events) VALUES (@submittedAt, @text, @profileId, @startedTypingAt, @finishedTypingAt, @clientTimezone, @clientTimezoneOffset, @events) RETURNING id", connection, transaction);
 
-        cmd.Parameters.AddWithValue("submittedAt", DateTime.UtcNow);
-        cmd.Parameters.AddWithValue("text", typingResult.Text);
-        cmd.Parameters.AddWithValue("profileId", profileId);
-        cmd.Parameters.AddWithValue("startedTypingAt", typingResult.StartedTypingAt);
-        cmd.Parameters.AddWithValue("finishedTypingAt", typingResult.FinishedTypingAt);
-        cmd.Parameters.AddWithValue("clientTimezone", typingResult.Timezone);
-        cmd.Parameters.AddWithValue("clientTimezoneOffset", typingResult.TimezoneOffset);
+            cmd.Parameters.AddWithValue("submittedAt", DateTime.UtcNow);
+            cmd.Parameters.AddWithValue("text", typingResult.Text);
+            cmd.Parameters.AddWithValue("profileId", profileId);
+            cmd.Parameters.AddWithValue("startedTypingAt", typingResult.StartedTypingAt);
+            cmd.Parameters.AddWithValue("finishedTypingAt", typingResult.FinishedTypingAt);
+            cmd.Parameters.AddWithValue("clientTimezone", typingResult.Timezone);
+            cmd.Parameters.AddWithValue("clientTimezoneOffset", typingResult.TimezoneOffset);
 
-        var jsonEvents = cmd.Parameters.Add("events", NpgsqlTypes.NpgsqlDbType.Json);
-        jsonEvents.Value = JsonSerializer.Serialize(typingResult.Events);
+            var jsonEvents = cmd.Parameters.Add("events", NpgsqlTypes.NpgsqlDbType.Json);
+            jsonEvents.Value = JsonSerializer.Serialize(typingResult.Events);
 
-        var id = await cmd.ExecuteScalarAsync()
-            ?? throw new InvalidOperationException("Database insert returned null result.");
+            var idObj = await cmd.ExecuteScalarAsync()
+                ?? throw new InvalidOperationException("Database insert returned null result.");
+            id = idObj.ToString() ?? throw new InvalidOperationException("Database insert returned null result");
 
-        var startedTypingAt = typingResult.StartedTypingAt;
-        var finishedTypingAt = typingResult.FinishedTypingAt;
-        var lengthSeconds = Convert.ToDecimal((finishedTypingAt - startedTypingAt).TotalSeconds);
+            startedTypingAt = typingResult.StartedTypingAt;
+            var finishedTypingAt = typingResult.FinishedTypingAt;
+            lengthSeconds = Convert.ToDecimal((finishedTypingAt - startedTypingAt).TotalSeconds);
+        }
+
+        if (typingResult.TextMetadata != null)
+        {
+            await using var cmd = new NpgsqlCommand(@"INSERT INTO text_metadata (typing_bundle_id, theme, for_training) VALUES (@typingBundleId, @theme, @forTraining)", connection, transaction);
+
+            cmd.Parameters.AddWithValue("typingBundleId", id);
+            cmd.Parameters.AddWithValue("theme", ((object)typingResult.TextMetadata.Theme!) ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("forTraining", ((object)typingResult.TextMetadata.ForTraining!) ?? DBNull.Value);
+        }
+
+        await transaction.CommitAsync();
 
         return new TypingSessionInfo(
-            id.ToString() ?? throw new InvalidOperationException("Database insert returned null result"),
-            typingResult.Text, startedTypingAt, lengthSeconds);
+            id, typingResult.Text, startedTypingAt, lengthSeconds);
+    }
+
+    private TextMetadata? CreateMetadata(DbDataReader reader)
+    {
+        string? theme = null;
+        string? forTraining = null;
+
+        if (!reader.IsDBNull(6))
+        {
+            theme = reader.GetString(6);
+        }
+
+        if (!reader.IsDBNull(7))
+        {
+            forTraining = reader.GetString(7);
+        }
+
+        if (theme == null && forTraining == null)
+            return null;
+
+        return new TextMetadata(theme, forTraining);
     }
 }

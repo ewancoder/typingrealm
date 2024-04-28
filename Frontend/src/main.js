@@ -14,11 +14,18 @@ document.body.classList.remove('non-scrollable');
 let typing = undefined;
 let replay = undefined;
 let sessions = undefined;
+let customTheme = undefined;
 
 // Typing manager that manager how the text is being typed.
 const textElement = document.getElementById('text');
 const replayElement = document.getElementById('replay');
 const typingState = initializeTypingState(textElement, async data => {
+    if (customTheme !== undefined && customTheme.length > 0) {
+        data.textMetadata = {
+            theme: customTheme
+        }
+    }
+
     sessions.uploadResults(data); // Intentionally not awaited for faster UI experience.
 
     showControls();
@@ -70,7 +77,8 @@ window.submitText = async function submitText() {
 window.generateText = async function generateText() {
     let text = null;
     try {
-        let content = await http.get(`${config.textApiUrl}/generate?length=300&theme=${inputElement.value.trim()}`);
+        customTheme = inputElement.value.trim();
+        let content = await http.get(`${config.textApiUrl}/generate?length=300&theme=${customTheme}`);
         text = await content.text();
     } catch {
         notifier.alertError('Could not generate a new text.');
