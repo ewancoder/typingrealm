@@ -5,6 +5,13 @@ body {
     font-size: 1rem;
 }
 
+.welcome {
+    font-size: 1.5rem;
+    width: 1000px;
+    margin: 20px auto;
+    text-align: center;
+}
+
 .non-scrollable {
     overflow: hidden;
 }
@@ -65,6 +72,14 @@ body {
     background-color: #ddd;
 }
 
+.styled {
+    visibility: hidden;
+}
+
+.typed-styled {
+    color: #333;
+}
+
 .wrong {
     color: #a55;
     background-color: #fdd;
@@ -90,12 +105,12 @@ body {
 }
 
 .submit-button {
-    width: 100px;
+    width: 150px;
     height: 40px;
     border: none;
     background-color: #888888;
-    margin: 13px auto;
-    display: block;
+    margin: 13px 40px;
+    display: inline;
     font-size: 1.5em;
     font-family: monospace;
 }

@@ -6,10 +6,15 @@
     <script src="https://accounts.google.com/gsi/client" async></script>
   </head>
   <body class="non-scrollable">
-    <div id="input-area" class="hidden">
-      <textarea id="input"></textarea>
-      <button class="submit-button" onclick="submitText()">Start</button>
-      <button class="generate-button" onclick="generateText()">⟳</button>
+    <div id="welcome" class="welcome">
+      <div id="welcomeElement"></div>
+    </div>
+    <div id="input-area" class="hidden showup">
+      <div><textarea id="input"></textarea></div>
+      <div>
+        <button class="submit-button" onclick="submitText()">My text</button>
+        <button class="submit-button" onclick="generateText()">Generate</button>
+      </div>
     </div>
     <div id="countdown"></div>
     <div id="text"></div>

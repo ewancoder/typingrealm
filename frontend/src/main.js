@@ -5,11 +5,14 @@ import { initializeSessions } from './typing-sessions.js';
 import { auth } from './auth.js';
 import { http } from './http.js';
 import { config } from './config.js';
+import { processWelcomeScreen, play, playCountdown } from './welcome.js';
 import './google-auth.js'; // Sets up google auth.
 
 // Initialize authentication.
 await auth.getToken();
 document.body.classList.remove('non-scrollable');
+
+await processWelcomeScreen();
 
 let typing = undefined;
 let replay = undefined;
@@ -31,6 +34,9 @@ const typingState = initializeTypingState(textElement, async data => {
     showControls();
 
     replay.replayTypingSession(data.text, data.events);
+
+    play('Nice! Keep typing and gathering statistics. We\'ll keep showing you tips here.', 1);
+    localStorage.setItem('tips', 2);
 });
 
 const countdownElement = document.getElementById('countdown');
@@ -49,6 +55,8 @@ sessions = await initializeSessions(replay, sessionsElement, raceGhost);
 const inputAreaElement = document.getElementById('input-area');
 const inputElement = document.getElementById('input');
 showControls();
+
+play('Copy text that you want to type here, or use the Generate button so we can generate it for you.', 1);
 
 /* Function that is being called on submit button click, when you submit
  * the text that you want to type. */
@@ -72,6 +80,8 @@ window.submitText = async function submitText() {
     replay.stop();
 
     hideControls();
+
+    play('Now type this text as fast as you can, correcting any mistakes that you make. Complete telemetry of all your keystrokes and their delays will be recorded.', 1);
 }
 
 window.generateText = async function generateText() {
@@ -94,6 +104,8 @@ window.generateText = async function generateText() {
     replay.stop();
 
     hideControls();
+
+    play('Now type this text as fast as you can, correcting any mistakes that you make. Complete telemetry of all your keystrokes and their delays will be recorded.', 1);
 }
 
 async function raceGhost(loadedSession) {
@@ -105,17 +117,7 @@ async function raceGhost(loadedSession) {
 
     typingState.prepareText(loadedSession.text);
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    countdownElement.innerHTML = '3';
-
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    countdownElement.innerHTML = '2';
-
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    countdownElement.innerHTML = '1';
-
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    countdownElement.innerHTML = '';
+    await playCountdown();
 
     document.addEventListener('keydown', typing.processKeyDown);
     document.addEventListener('keyup', typing.processKeyUp);

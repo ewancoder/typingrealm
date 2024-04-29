@@ -1,4 +1,5 @@
-export function initializeTypingState(textElement, finishTypingCallback) {
+// TODO: Refactor "styled" style to a separate function. We need performance here.
+export function initializeTypingState(textElement, finishTypingCallback, styled) {
     // Current typing state object.
     return {
         /* This indicates whether input should be handled. */
@@ -53,6 +54,7 @@ export function initializeTypingState(textElement, finishTypingCallback) {
             text.split('').forEach(character => {
                 const characterSpan = document.createElement('span');
                 characterSpan.innerText = character;
+                if (styled) characterSpan.classList.add('styled');
                 textElement.appendChild(characterSpan);
                 this.textToType.push({
                     character: character,
@@ -153,7 +155,12 @@ export function initializeTypingState(textElement, finishTypingCallback) {
                 if (currentKey.failed) {
                     currentSpan.classList.add('corrected');
                 } else {
-                    currentSpan.classList.add('typed');
+                    if (styled) {
+                        currentSpan.classList.remove('styled');
+                        currentSpan.classList.add('typed-styled');
+                    } else {
+                        currentSpan.classList.add('typed');
+                    }
                 }
             }
 
