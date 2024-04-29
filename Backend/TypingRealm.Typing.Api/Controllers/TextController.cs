@@ -25,7 +25,7 @@ public sealed class TextController : ControllerBase
 
     [HttpGet]
     [Route("generate")]
-    public async ValueTask<ActionResult<string>> GenerateText(int length, string? theme)
+    public async ValueTask<ActionResult<string>> GenerateText(int length, string? theme, string? forTraining)
     {
         if (length <= 10)
             return BadRequest($"Length should be at least 10 characters long.");
@@ -49,6 +49,19 @@ public sealed class TextController : ControllerBase
                 new ChatRequestUserMessage($"Generate meaningful thematic text{themeString}")
             }
         };
+
+        if (!string.IsNullOrWhiteSpace(forTraining))
+        {
+            options = new ChatCompletionsOptions
+            {
+                DeploymentName = "gpt-3.5-turbo",
+                Messages =
+                {
+                    new ChatRequestSystemMessage($"Generate text without any ambient info, {length} characters long, for training typing the character {forTraining}"),
+                    new ChatRequestUserMessage($"Generate meaningful text for training typing character '{forTraining}'")
+                }
+            };
+        }
 
         var response = await _openAiClient.GetChatCompletionsAsync(options);
         var responseMessage = response.Value.Choices[0].Message;

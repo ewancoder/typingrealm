@@ -12,12 +12,22 @@ public sealed record TypingStatistics(
     decimal minSpeed,
     decimal maxSpeed,
     decimal averageSpeed,
-    IEnumerable<KeyValuePair<string, string[]>> mistakes);
+    IEnumerable<KeyValuePair<string, string[]>> mistakes,
+    IEnumerable<KeyValuePair<char, KeyStatistics>> keyStatistics);
+
+public sealed class KeyStatistics
+{
+    public int TypedCount { get; set; }
+    public int ErrorCount { get; set; }
+    public decimal ErrorRate => ((decimal)ErrorCount) / (TypedCount == 0 ? 1 : TypedCount);
+}
 
 [Authorize]
 [Route("api/typing")]
 public sealed class TypingController : ControllerBase
 {
+    // TODO: Introduce other languages and refactor this.
+    private const string AllKeys = "1234567890[]`~!@#$%^&*(){}',.pyfgcrl/=\"<>PYFGCRL?+|aoeuidhtns-AOEUIDHTNS_;qjkxbmwvz:QJKXBMWVZ ";
     private readonly ITypingRepository _typingRepository;
 
     public TypingController(ITypingRepository typingRepository)
@@ -35,6 +45,8 @@ public sealed class TypingController : ControllerBase
         var totalTime = 0m;
         var minSpeed = 0m;
         var maxSpeed = 0m;
+
+        var allKeysStatistics = AllKeys.ToDictionary(x => x, x => new KeyStatistics());
 
         foreach (var info in await _typingRepository.GetAllTypingSessionInfosAsync())
         {
@@ -74,12 +86,17 @@ public sealed class TypingController : ControllerBase
                 {
                     typed += e.Key;
                     index++;
+
+                    allKeysStatistics[e.Key[0]].TypedCount++;
+
                     continue;
                 }
 
                 // If we got here - there's an error.
                 typed += e.Key;
                 index++;
+
+                allKeysStatistics[text[index - 1]].ErrorCount++;
 
                 if (errorIndex == 0)
                 {
@@ -106,9 +123,11 @@ public sealed class TypingController : ControllerBase
             .Select(x => new KeyValuePair<string, string[]>(x.Key, x.ToArray()))
             .ToList();
 
+        var keyStatistics = allKeysStatistics.OrderByDescending(x => x.Value.ErrorRate).ToList();
+
         var averageSpeed = totalCharacters / (totalTime / 60000m);
 
-        return new TypingStatistics(minSpeed, maxSpeed, averageSpeed, pairs);
+        return new TypingStatistics(minSpeed, maxSpeed, averageSpeed, pairs, keyStatistics);
     }
 
     [HttpGet]
