@@ -134,6 +134,13 @@ async function updateStatus() {
         progress = 100 * profile.typedToday / profile.goalCharacters;
         if (progress > 100) progress = 100;
     }
+
+    if (progress === 100) {
+        progressElement.style.backgroundColor = '#09e';
+    } else {
+        progressElement.style.backgroundColor = '#0a0';
+    }
+
     progressElement.style.width = `${progress}%`;
 }
 updateStatus(); // Intentionally not awaited.
