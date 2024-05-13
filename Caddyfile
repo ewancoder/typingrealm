@@ -1,17 +1,62 @@
 {
-    #email typingrealm@gmail.com
+    email typingrealm@gmail.com
 }
 
-#typingrealm.com {
-localhost {
-    reverse_proxy typingrealm-web-ui:80
+typingrealm.com {
+#localhost {
+    reverse_proxy typingrealm-web:8080
 }
 
-#api.typingrealm.com {
-api.localhost {
+game.typingrealm.com {
+#game.localhost {
+    reverse_proxy typingrealm-game-web:8080
+}
+
+api.typingrealm.com {
+#api.localhost {
     handle_path /typing/* {
         reverse_proxy typingrealm-typing-1:8080 typingrealm-typing-2:8080 {
             lb_policy round_robin
         }
     }
+
+    handle_path /game/* {
+        reverse_proxy typingrealm-game:8080
+    }
+}
+
+dev.typingrealm.com {
+    reverse_proxy dev-typingrealm-web:8080
+}
+
+dev.game.typingrealm.com {
+    reverse_proxy dev-typingrealm-game-web:8080
+}
+
+dev.api.typingrealm.com {
+    handle_path /typing/* {
+        reverse_proxy dev-typingrealm-typing-1:8080 dev-typingrealm-typing-2:8080 {
+            lb_policy round_robin
+        }
+    }
+
+    handle_path /game/* {
+        reverse_proxy dev-typingrealm-game:8080
+    }
+}
+
+api.kartman.typingrealm.com {
+    reverse_proxy kartman-api:8080
+}
+
+kartman.typingrealm.com {
+    reverse_proxy kartman-web:8080
+}
+
+dev.api.kartman.typingrealm.com {
+    reverse_proxy dev-kartman-api:8080
+}
+
+dev.kartman.typingrealm.com {
+    reverse_proxy dev-kartman-web:8080
 }
