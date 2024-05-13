@@ -22,6 +22,7 @@ let customTheme = undefined;
 // Typing manager that manager how the text is being typed.
 const textElement = document.getElementById('text');
 const replayElement = document.getElementById('replay');
+const progressElement = document.getElementById('progress-value');
 const typingState = initializeTypingState(textElement, async data => {
     if (customTheme !== undefined && customTheme.length > 0) {
         data.textMetadata = {
@@ -29,7 +30,7 @@ const typingState = initializeTypingState(textElement, async data => {
         }
     }
 
-    sessions.uploadResults(data); // Intentionally not awaited for faster UI experience.
+    uploadAndUpdateStatus(data); // Intentionally not awaited for faster UI experience.
 
     showControls();
 
@@ -38,6 +39,11 @@ const typingState = initializeTypingState(textElement, async data => {
     play('Nice! Keep typing and gathering statistics. We\'ll keep showing you tips here.', 1);
     localStorage.setItem('tips', 2);
 });
+
+async function uploadAndUpdateStatus(data) {
+    await sessions.uploadResults(data);
+    await updateStatus();
+}
 
 const countdownElement = document.getElementById('countdown');
 
@@ -107,6 +113,30 @@ window.generateText = async function generateText() {
 
     play('Now type this text as fast as you can, correcting any mistakes that you make. Complete telemetry of all your keystrokes and their delays will be recorded.', 1);
 }
+
+// TODO: Handle errors / success with notifications.
+window.setDailyGoal = async function setDailyGoal() {
+    const goalValue = prompt('Enter your daily goal in characters (one default text = 300 characters):');
+    if (!goalValue) return;
+    await http.post(`${config.statisticsApiUrl}/profile`, {
+        goalCharacters: goalValue
+    });
+    await updateStatus();
+}
+
+async function updateStatus() {
+    const profileResponse = await http.get(`${config.statisticsApiUrl}/profile`);
+    const profile = await profileResponse.json();
+    notifier.alertSuccess('Goal status: ' + profile.typedToday + ' / ' + profile.goalCharacters);
+
+    let progress = 0;
+    if (profile.goalCharacters != 0) {
+        progress = 100 * profile.typedToday / profile.goalCharacters;
+        if (progress > 100) progress = 100;
+    }
+    progressElement.style.width = `${progress}%`;
+}
+updateStatus(); // Intentionally not awaited.
 
 async function raceGhost(loadedSession) {
     replay.stop();

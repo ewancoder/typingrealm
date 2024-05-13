@@ -12,6 +12,10 @@ namespace TypingRealm.Typing.DataAccess;
 // TODO: Avoid primitive obsession using TypingSessionId and TypingResultId, and User/Profile.
 // TODO: Consider refactoring User and Archived contexts to specifications.
 
+public sealed record ProfileInfo(
+    int GoalCharacters,
+    int TypedToday);
+
 public interface ITypingRepository
 {
     ValueTask<IEnumerable<TypingSessionInfo>> GetAllTypingSessionInfosAsync();
@@ -19,6 +23,8 @@ public interface ITypingRepository
     ValueTask<TypingSessionInfo> SaveTypingResultAsync(TypingResult typingResult);
     ValueTask<bool> ArchiveTypingSessionByIdAsync(string id);
     ValueTask<bool> RollbackArchiveTypingSessionByIdAsync(string id);
+    ValueTask<ProfileInfo> GetProfileInfoAsync();
+    ValueTask SaveProfileInfoAsync(ProfileInfo profileInfo);
 }
 
 public sealed class TypingRepository : ITypingRepository
@@ -77,6 +83,57 @@ public sealed class TypingRepository : ITypingRepository
         }
 
         return result;
+    }
+
+    public async ValueTask<ProfileInfo> GetProfileInfoAsync()
+    {
+        var profileId = _authenticationContext.GetUserProfileId();
+
+        using var connection = await _db.OpenConnectionAsync();
+
+        var goalCharacters = 0;
+        var typedToday = 0;
+
+        {
+            await using var cmd = new NpgsqlCommand(@"SELECT goal_characters FROM profile WHERE profile_id = @profileId", connection);
+            cmd.Parameters.AddWithValue("@profileId", profileId);
+
+            await using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                goalCharacters = reader.GetInt32(0);
+            }
+        }
+
+        {
+            await using var cmd = new NpgsqlCommand(@"SELECT text FROM typing_bundle WHERE profile_id = @profileId AND is_archived = false AND started_typing_at > @startOfToday", connection);
+            cmd.Parameters.AddWithValue("@profileId", profileId);
+            cmd.Parameters.AddWithValue("@startOfToday", DateTime.UtcNow.Date);
+            await using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                typedToday += reader.GetString(0).Length;
+            }
+        }
+
+        return new ProfileInfo(goalCharacters, typedToday);
+    }
+
+    public async ValueTask SaveProfileInfoAsync(ProfileInfo profileInfo)
+    {
+        var profileId = _authenticationContext.GetUserProfileId();
+
+        using var connection = await _db.OpenConnectionAsync();
+
+        await using var cmd = new NpgsqlCommand(@"
+INSERT INTO profile (profile_id, goal_characters)
+VALUES (@profileId, @goalCharacters)
+ON CONFLICT(profile_id)
+DO UPDATE SET goal_characters = @goalCharacters;", connection);
+        cmd.Parameters.AddWithValue("@profileId", profileId);
+        cmd.Parameters.AddWithValue("@goalCharacters", profileInfo.GoalCharacters);
+
+        var affectedRows = await cmd.ExecuteNonQueryAsync();
     }
 
     public async ValueTask<TypingResult?> GetTypingResultByIdAsync(string id)
