@@ -50,6 +50,9 @@ public sealed class TypingController : ControllerBase
 
         foreach (var info in await _typingRepository.GetAllTypingSessionInfosAsync())
         {
+            if (info.Text.StartsWith("romanized"))
+                continue; // Romanized statistics is not implemented yet.
+
             var typing = await _typingRepository.GetTypingResultByIdAsync(info.Id)
                 ?? throw new InvalidOperationException("Could not load typing result.");
 
