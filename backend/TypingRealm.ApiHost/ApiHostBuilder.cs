@@ -34,6 +34,9 @@ public static partial class ApiHostBuilder
             {
                 o.TokenValidationParameters.ValidIssuer = "https://accounts.google.com";
                 o.TokenValidationParameters.ValidAudience = GoogleClient;
+#if DEBUG
+                o.TokenValidationParameters.ValidateLifetime = false;
+#endif
                 o.TokenValidationParameters.SignatureValidator = delegate (string token, TokenValidationParameters parameters)
                 {
                     GoogleJsonWebSignature.ValidateAsync(token, new GoogleJsonWebSignature.ValidationSettings
