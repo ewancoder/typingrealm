@@ -66,7 +66,7 @@ public sealed class StatisticsController : ControllerBase
 
     [HttpGet]
     [Route("characters")]
-    public async ValueTask<CharacterStatistics> CalculateCharacterStatistics()
+    public async ValueTask<CharacterStatistics> CalculateCharacterStatistics(string orderBy)
     {
         var errorStatistics = await CalculateErrorsStatistics();
 
@@ -83,11 +83,17 @@ public sealed class StatisticsController : ControllerBase
             statisticsErrors.AddRange(statistics.Errors);
         }
 
-        var characters = statisticsErrors.GroupBy(x => x.correctCharacter).Select(x => new CharacterStats(
+        var charactersEnumerable = statisticsErrors.GroupBy(x => x.correctCharacter).Select(x => new CharacterStats(
             x.Key,
             totalKeysTyped.Count(o => o == x.Key),
-            x.Count())).OrderByDescending(x => x.ErrorIndex).ToList();
-        return new CharacterStatistics(totalTyped, totalTimePerf, characters);
+            x.Count()));
+
+        if (orderBy == "typed")
+            charactersEnumerable = charactersEnumerable.OrderBy(x => x.TotalTyped);
+        else
+            charactersEnumerable = charactersEnumerable.OrderByDescending(x => x.ErrorIndex);
+
+        return new CharacterStatistics(totalTyped, totalTimePerf, charactersEnumerable.ToList());
     }
 
     [HttpGet]
@@ -113,6 +119,11 @@ public sealed class StatisticsController : ControllerBase
 
     private SessionStatistics GetSessionStatistics(string id, TypingResult result)
     {
+        // TODO: Check session 58: it has bad letters at the end.
+        // TODO: Also check that at the end "typed" part is equal to the "text".
+        // For example, in that 58 bad session there's a discrepancy for some reason.
+        //if (id == "58")
+
         var text = result.Text;
         var index = 0;
         var typed = string.Empty;
@@ -125,53 +136,60 @@ public sealed class StatisticsController : ControllerBase
         var errors = new List<Error>();
         foreach (var e in result.Events)
         {
-            // Only account Press events.
-            if (e.KeyAction == KeyAction.Release)
-                continue;
-
-            if (firstPerf == -1)
-                firstPerf = e.Perf;
-            lastPerf = e.Perf;
-
-            if (e.Key.ToLowerInvariant() == "backspace" && index > 0)
+            try
             {
-                if (errorIndex == index)
+                // Only account Press events.
+                if (e.KeyAction == KeyAction.Release)
+                    continue;
+
+                if (firstPerf == -1)
+                    firstPerf = e.Perf;
+                lastPerf = e.Perf;
+
+                if (e.Key.ToLowerInvariant() == "backspace" && index > 0)
                 {
-                    errorIndex = 0;
-                    errors.Last().CorrectionLetters = correctionLetters;
-                    errors.Last().CorrectionTimePerf = lastPerf - firstCorrectionPerf;
+                    if (errorIndex == index)
+                    {
+                        errorIndex = 0;
+                        errors.Last().CorrectionLetters = correctionLetters;
+                        errors.Last().CorrectionTimePerf = lastPerf - firstCorrectionPerf;
+                    }
+
+                    index--;
+                    typed = typed[..^1];
+                    continue;
                 }
 
-                index--;
-                typed = typed[..^1];
-                continue;
-            }
+                if (e.Key.Length != 1)
+                    continue;
 
-            if (e.Key.Length != 1)
-                continue;
+                if (index < text.Length && e.Key[0] == text[index])
+                {
+                    typed += e.Key;
+                    index++;
+                    keysTyped.Add(e.Key[0]);
 
-            if (e.Key[0] == text[index])
-            {
+                    continue;
+                }
+
+                // If we got here - there's an error.
                 typed += e.Key;
                 index++;
-                keysTyped.Add(e.Key[0]);
+                correctionLetters++;
 
-                continue;
-            }
+                if (errorIndex == 0)
+                {
+                    correctionLetters = 1;
+                    firstCorrectionPerf = lastPerf;
+                    errorIndex = index;
 
-            // If we got here - there's an error.
-            typed += e.Key;
-            index++;
-            correctionLetters++;
-
-            if (errorIndex == 0)
+                    var error = MakeError(id, text, index - 1, e.Key[0]);
+                    errors.Add(error);
+                }
+            } catch (Exception exception)
             {
-                correctionLetters = 1;
-                firstCorrectionPerf = lastPerf;
-                errorIndex = index;
-
-                var error = MakeError(id, text, index - 1, e.Key[0]);
-                errors.Add(error);
+                // This is for debugging purposes.
+                throw;
             }
         }
 
