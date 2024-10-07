@@ -6,6 +6,11 @@ body {
     margin: 0;
 }
 
+.glyph {
+    font-size: 3rem;
+    margin: 10px;
+}
+
 #progress {
     background-color: #aaa;
     height: 10px;

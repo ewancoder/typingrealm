@@ -47,22 +47,81 @@ export function initializeTypingState(textElement, finishTypingCallback, styled)
 
         // Prepares the text and draws it in the textElement field, and allows input.
         prepareText(text) {
-            this.reset();
-            text = this.normalizeText(text);
-            this.sourceText = text;
+            // Text should be an array of objects { glyph, romanized }.
 
-            text.split('').forEach(character => {
-                const characterSpan = document.createElement('span');
-                characterSpan.innerText = character;
-                if (styled) characterSpan.classList.add('styled');
-                textElement.appendChild(characterSpan);
-                this.textToType.push({
-                    character: character,
-                    currentlyFailed: false,
-                    failed: false,
-                    span: characterSpan
+            console.log(text);
+
+            if (Array.isArray(text)) {
+                // TODO: IF glyph text (make a switch later).
+                var data = text.flatMap(info => {
+                    return info.romanized.split('').map(character => {
+                        info.count = info.romanized.length;
+                        return {
+                            character: character,
+                            info: info
+                        };
+                    });
                 });
-            });
+
+                this.reset();
+                //text = this.normalizeText(text);
+                this.sourceText = text;
+
+                // For now.
+                const glyphTextElement = textElement;
+
+                let glyphSpan = undefined;
+                let prevInfo = undefined;
+                data.forEach(info => {
+                    if (prevInfo === undefined) {
+                        prevInfo = info.info;
+                        glyphSpan = document.createElement('span');
+                        glyphSpan.classList.add('glyph');
+                        glyphTextElement.appendChild(glyphSpan);
+                    } else {
+                        if (info.info !== prevInfo) {
+                            prevInfo = info.info;
+                            glyphSpan = document.createElement('span');
+                            glyphSpan.classList.add('glyph');
+                            glyphTextElement.appendChild(glyphSpan);
+                        }
+                    }
+
+                    glyphSpan.innerText = info.info.glyph;
+
+                    const characterSpan = document.createElement('span');
+                    characterSpan.innerText = info.character;
+                    if (styled) characterSpan.classList.add('styled');
+                    textElement.appendChild(characterSpan);
+                    this.textToType.push({
+                        character: info.character,
+                        currentlyFailed: false,
+                        failed: false,
+                        span: characterSpan,
+                        glyphSpan: glyphSpan,
+                        info: info
+                    });
+                });
+            } else {
+                this.reset();
+                text = this.normalizeText(text);
+                this.sourceText = text;
+
+                text.split('').forEach(character => {
+                    const characterSpan = document.createElement('span');
+                    characterSpan.innerText = character;
+                    if (styled) characterSpan.classList.add('styled');
+                    textElement.appendChild(characterSpan);
+                    this.textToType.push({
+                        character: character,
+                        currentlyFailed: false,
+                        failed: false,
+                        span: characterSpan,
+                        glyphSpan: characterSpan, // So it doesn't fail.
+                        info: { info: { count: 0 }} // Same reason.
+                    });
+                });
+            }
 
             // Indicates that everything has been set up and now user input can start to be processed.
             this.allowInput = true;
@@ -109,10 +168,12 @@ export function initializeTypingState(textElement, finishTypingCallback, styled)
 
             let currentKey = null;
             let currentSpan = null;
+            let currentGlyph = null;
 
             if (this.index !== this.textToType.length) {
                 currentKey = this.textToType[this.index];
                 currentSpan = currentKey.span;
+                currentGlyph = currentKey.glyphSpan;
             }
 
             if (key === 'Backspace') {
@@ -121,22 +182,34 @@ export function initializeTypingState(textElement, finishTypingCallback, styled)
                 if (currentKey !== null) {
                     // Move caret away.
                     currentSpan.classList.remove('cursor');
+                    currentGlyph.classList.remove('cursor');
                 }
 
                 this.index--;
 
                 currentKey = this.textToType[this.index];
                 currentSpan = currentKey.span;
+                currentGlyph = currentKey.glyphSpan;
+
+                if (!currentKey.failed) {
+                    currentKey.info.info.count++;
+                    console.log(this.textToType);
+                }
 
                 currentKey.currentlyFailed = false;
                 currentSpan.classList.remove('typed');
                 currentSpan.classList.remove('wrong');
                 currentSpan.classList.remove('corrected');
+                currentGlyph.classList.remove('typed');
+                currentGlyph.classList.remove('wrong');
+                currentGlyph.classList.remove('corrected');
                 if (currentKey.failed && currentKey.character !== ' ') {
                     currentSpan.classList.add('was-wrong');
+                    currentGlyph.classList.add('was-wrong');
                 }
 
                 currentSpan.classList.add('cursor');
+                currentGlyph.classList.add('cursor');
                 return;
             }
 
@@ -144,22 +217,31 @@ export function initializeTypingState(textElement, finishTypingCallback, styled)
 
             // Move caret away.
             currentSpan.classList.remove('cursor');
+            currentGlyph.classList.remove('cursor');
 
             if (currentKey.character !== key) {
                 currentKey.failed = true;
                 currentKey.currentlyFailed = true;
                 currentSpan.classList.add('wrong');
+                currentGlyph.classList.add('wrong');
             } else {
                 currentSpan.classList.remove('was-wrong');
+                currentGlyph.classList.remove('was-wrong');
+                currentKey.info.info.count--;
+                console.log(this.textToType);
 
                 if (currentKey.failed) {
                     currentSpan.classList.add('corrected');
+                    currentGlyph.classList.add('corrected');
                 } else {
                     if (styled) {
                         currentSpan.classList.remove('styled');
+                        currentGlyph.classList.remove('styled');
                         currentSpan.classList.add('typed-styled');
+                        currentGlyph.classList.add('typed-styled');
                     } else {
                         currentSpan.classList.add('typed');
+                        currentGlyph.classList.add('typed');
                     }
                 }
             }

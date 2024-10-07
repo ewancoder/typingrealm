@@ -95,7 +95,7 @@ window.generateText = async function generateText() {
     try {
         customTheme = inputElement.value.trim();
         let content = await http.get(`${config.textApiUrl}/generate?length=300&theme=${customTheme}`);
-        text = await content.text();
+        text = await content.json(); // use text() here when requesting regular text.
     } catch {
         notifier.alertError('Could not generate a new text.');
         return;
