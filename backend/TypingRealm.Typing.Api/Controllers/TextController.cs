@@ -22,11 +22,9 @@ public sealed class TextController : ControllerBase
 
     [HttpGet]
     [Route("generate")]
-    public async ValueTask<ActionResult<object>> GenerateText(int length, string? theme, string? forTraining, string? language, bool? romanized)
+    public async ValueTask<ActionResult<object>> GenerateText(int length, string? theme, string? forTraining, string? language, bool romanized = false)
     {
-        _ = romanized;
-
-        var isGlyph = false; // Disable glyphs for now.
+        var isGlyph = romanized;
         var hieroglyphPrompt = $"Generate {language ?? "japanese"} text, break it down into hieroglyphs and romanize each hieroglyph. Output only the following information in the following format: On each new line there should be a single one hieroglyph followed by a > character and then the romanized version of that single particular hieroglyph. Romanized version of the text should be at least 300 characters long.";
 
         if (length <= 10)
@@ -49,7 +47,7 @@ public sealed class TextController : ControllerBase
 
         var options = new ChatCompletionsOptions
         {
-            DeploymentName = "gpt-3.5-turbo",
+            DeploymentName = "gpt-4o-mini",
             Messages =
             {
                 //new ChatRequestSystemMessage($"Generate text without any ambient info, {length} characters long, for training typing, decently spread out across whole keyboard{languagePrompt}"),
@@ -62,7 +60,7 @@ public sealed class TextController : ControllerBase
         {
             options = new ChatCompletionsOptions
             {
-                DeploymentName = "gpt-3.5-turbo",
+                DeploymentName = "gpt-4o-mini",
                 Messages =
                 {
                     new ChatRequestSystemMessage($"Generate text without any ambient info, {length} characters long, for training typing, decently spread out across whole keyboard{languagePrompt}"),
@@ -76,7 +74,7 @@ public sealed class TextController : ControllerBase
         {
             options = new ChatCompletionsOptions
             {
-                DeploymentName = "gpt-3.5-turbo",
+                DeploymentName = "gpt-4o-mini",
                 Messages =
                 {
                     new ChatRequestSystemMessage($"Generate text without any ambient info, {length} characters long, for training typing the character {forTraining}"),
