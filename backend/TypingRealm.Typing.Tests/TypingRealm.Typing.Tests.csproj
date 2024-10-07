@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\TypingRealm.Typing\TypingRealm.Typing.csproj" />
+  </ItemGroup>
+</Project>

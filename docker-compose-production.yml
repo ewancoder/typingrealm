@@ -3,18 +3,9 @@ version: "3.8"
 networks:
   default:
     name: typingrealm
+    external: true
 
 services:
-  typingrealm-web-ui:
-    image: ${DOCKER_REGISTRY-}typingrealm-web-ui
-    container_name: typingrealm-web-ui
-    build:
-      context: frontend/.
-      dockerfile: Dockerfile-production
-    restart: unless-stopped
-    mem_limit: 1g
-    mem_reservation: 750m
-
   typingrealm-caddy:
     image: caddy
     container_name: typingrealm-caddy
@@ -22,27 +13,31 @@ services:
       - 80:80
       - 443:443
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - ./infrastructure-data/prod/caddy_data:/data
+      - /data/caddy/Caddyfile:/etc/caddy/Caddyfile
+      - /data/caddy/data:/data
+    restart: unless-stopped
+    mem_limit: 1g
+    mem_reservation: 750m
+
+  typingrealm-web:
+    image: ghcr.io/ewancoder/typingrealm-web:main
+    container_name: typingrealm-web
     restart: unless-stopped
     mem_limit: 1g
     mem_reservation: 750m
 
   typingrealm-typing-1:
-    image: ${DOCKER_REGISTRY-}typingrealm-typing
+    image: ghcr.io/ewancoder/typingrealm-typing-api:main
     container_name: typingrealm-typing-1
-    build:
-      context: backend/.
-      dockerfile: TypingRealm.Typing.Api/Dockerfile-production
     restart: unless-stopped
     mem_limit: 1g
     mem_reservation: 750m
     env_file:
-      - .env.production.typing
-      - secrets.env
+      - /data/typingrealm/prod/typing/.env
+      - /data/typingrealm/prod/typing/secrets.env
 
   typingrealm-typing-2:
-    image: ${DOCKER_REGISTRY-}typingrealm-typing
+    image: ghcr.io/ewancoder/typingrealm-typing-api:main
     container_name: typingrealm-typing-2
     build:
       context: backend/.
@@ -51,8 +46,8 @@ services:
     mem_limit: 1g
     mem_reservation: 750m
     env_file:
-      - .env.production.typing
-      - secrets.env
+      - /data/typingrealm/prod/typing/.env
+      - /data/typingrealm/prod/typing/secrets.env
 
   typingrealm-typing-postgres:
     image: postgres:16
@@ -60,9 +55,9 @@ services:
     ports:
       - 10132:5432 # Port shouldn't be exposed in production.
     volumes:
-      - ./infrastructure-data/prod/typing/postgres:/var/lib/postgresql/data
+      - /data/typingrealm/prod/typing/postgres:/var/lib/postgresql/data
     restart: unless-stopped
     mem_limit: 1g
     mem_reservation: 750m
     env_file:
-      - .env.production.typing
+      - /data/typingrealm/prod/typing/.env
