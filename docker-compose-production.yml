@@ -55,7 +55,7 @@ services:
       - secrets.env
 
   typingrealm-typing-postgres:
-    image: postgres
+    image: postgres:16
     container_name: typingrealm-typing-postgres
     ports:
       - 10132:5432 # Port shouldn't be exposed in production.
