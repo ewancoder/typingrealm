@@ -91,11 +91,12 @@ window.submitText = async function submitText() {
 }
 
 window.generateText = async function generateText() {
+    const isGlypth = false;
     let text = null;
     try {
         customTheme = inputElement.value.trim();
         let content = await http.get(`${config.textApiUrl}/generate?length=300&theme=${customTheme}`);
-        text = await content.json(); // use text() here when requesting regular text.
+        text = isGlypth ? await content.json() : await content.text(); // use json() here when requesting romanized text.
     } catch {
         notifier.alertError('Could not generate a new text.');
         return;

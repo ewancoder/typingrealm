@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace TypingRealm.Typing;
+﻿namespace TypingRealm.Typing;
 
 public sealed record TextMetadata(
     string? Theme,

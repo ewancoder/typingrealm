@@ -1,17 +1,11 @@
 ﻿using Azure.AI.OpenAI;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace TypingRealm.Typing.Api.Controllers;
 
 // This controller will be moved to a separate project/service later, together with OpenAI functionality.
-//[Authorize]
+[Authorize]
 [Route("api/text")]
 public sealed class TextController : ControllerBase
 {
@@ -30,7 +24,9 @@ public sealed class TextController : ControllerBase
     [Route("generate")]
     public async ValueTask<ActionResult<object>> GenerateText(int length, string? theme, string? forTraining, string? language, bool? romanized)
     {
-        var isGlyph = true; // Temporarily assume we only have japanese.
+        _ = romanized;
+
+        var isGlyph = false; // Disable glyphs for now.
         var hieroglyphPrompt = $"Generate {language ?? "japanese"} text, break it down into hieroglyphs and romanize each hieroglyph. Output only the following information in the following format: On each new line there should be a single one hieroglyph followed by a > character and then the romanized version of that single particular hieroglyph. Romanized version of the text should be at least 300 characters long.";
 
         if (length <= 10)
@@ -48,6 +44,9 @@ public sealed class TextController : ControllerBase
 
         var languagePrompt = language == null ? string.Empty : $", in {language} language";
 
+        _ = themeString;
+        _ = languagePrompt;
+
         var options = new ChatCompletionsOptions
         {
             DeploymentName = "gpt-3.5-turbo",
@@ -58,6 +57,20 @@ public sealed class TextController : ControllerBase
                 //new ChatRequestUserMessage($"Generate meaningful thematic text{themeString}")
             }
         };
+
+        if (!isGlyph)
+        {
+            options = new ChatCompletionsOptions
+            {
+                DeploymentName = "gpt-3.5-turbo",
+                Messages =
+                {
+                    new ChatRequestSystemMessage($"Generate text without any ambient info, {length} characters long, for training typing, decently spread out across whole keyboard{languagePrompt}"),
+                    //new ChatRequestSystemMessage(hieroglyphPrompt)
+                    new ChatRequestUserMessage($"Generate meaningful thematic text{themeString}")
+                }
+            };
+        }
 
         if (!string.IsNullOrWhiteSpace(forTraining))
         {
@@ -81,7 +94,7 @@ public sealed class TextController : ControllerBase
             return Ok(ParseGlyphs(content));
         }
 
-        return content;
+        return responseMessage.Content[..Math.Min(responseMessage.Content.Length, length)];
     }
 
     private IEnumerable<object> ParseGlyphs(string content)

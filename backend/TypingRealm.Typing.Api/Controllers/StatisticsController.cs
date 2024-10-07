@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TypingRealm.Typing.DataAccess;
 
@@ -88,10 +84,9 @@ public sealed class StatisticsController : ControllerBase
             totalKeysTyped.Count(o => o == x.Key),
             x.Count()));
 
-        if (orderBy == "typed")
-            charactersEnumerable = charactersEnumerable.OrderBy(x => x.TotalTyped);
-        else
-            charactersEnumerable = charactersEnumerable.OrderByDescending(x => x.ErrorIndex);
+        charactersEnumerable = orderBy == "typed"
+            ? charactersEnumerable.OrderBy(x => x.TotalTyped)
+            : (IEnumerable<CharacterStats>)charactersEnumerable.OrderByDescending(x => x.ErrorIndex);
 
         return new CharacterStatistics(totalTyped, totalTimePerf, charactersEnumerable.ToList());
     }

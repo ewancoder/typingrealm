@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace TypingRealm.Typing;
+﻿namespace TypingRealm.Typing;
 
 public sealed record TypingSessionInfo(
     string Id,

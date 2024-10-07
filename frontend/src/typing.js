@@ -50,7 +50,6 @@ export function initializeTypingState(textElement, finishTypingCallback, styled)
             // Text should be an array of objects { glyph, romanized }.
 
             console.log(text);
-
             if (Array.isArray(text)) {
                 // TODO: IF glyph text (make a switch later).
                 var data = text.flatMap(info => {
@@ -193,7 +192,6 @@ export function initializeTypingState(textElement, finishTypingCallback, styled)
 
                 if (!currentKey.failed) {
                     currentKey.info.info.count++;
-                    console.log(this.textToType);
                 }
 
                 currentKey.currentlyFailed = false;
@@ -228,7 +226,6 @@ export function initializeTypingState(textElement, finishTypingCallback, styled)
                 currentSpan.classList.remove('was-wrong');
                 currentGlyph.classList.remove('was-wrong');
                 currentKey.info.info.count--;
-                console.log(this.textToType);
 
                 if (currentKey.failed) {
                     currentSpan.classList.add('corrected');

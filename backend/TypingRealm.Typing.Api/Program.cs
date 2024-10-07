@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
 using TypingRealm.ApiHost;
 using TypingRealm.Typing.DataAccess;
 [assembly: ApiController]
