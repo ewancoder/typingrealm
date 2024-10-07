@@ -23,7 +23,7 @@ RUN chmod +x /usr/local/bin/dbmate
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./TypingRealm.Typing.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
-COPY ../db /app/publish/db
+COPY ../db-typing /app/publish/db
 
 FROM base AS final
 WORKDIR /app
