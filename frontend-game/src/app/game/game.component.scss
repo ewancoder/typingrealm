@@ -1,0 +1,82 @@
+#location-picture {
+  width: 50vw;
+  height: 50vw;
+  max-height: 100%;
+  background-size: cover;
+}
+
+:host {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.screen {
+  width: 100vw;
+  height: 50vw;
+  max-height: 100%;
+}
+
+.main {
+  display: flex;
+  justify-content: center;
+  align-items: end;
+  background-color: #222822; /* TODO: Set specific colors based on location */
+  height: 100%;
+  column-gap: 2vw;
+}
+
+#character {
+  width: 20vw;
+  height: 40vw;
+  max-height: 100%;
+  //background-size: cover;
+  //background-image: url('/assets/general/typer-warrior.png');
+}
+
+#status {
+  width: 20vw;
+  height: 50vw;
+  max-height: 100%;
+  background-size: cover;
+}
+
+@font-face {
+  font-family: 'Gluten';
+  font-style: normal;
+  font-weight: 100;
+  src:
+    local('Gluten'),
+    url('https://fonts.cdnfonts.com/s/107417/Gluten[slnt,wght].woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Delicious Handrawn';
+  font-style: normal;
+  font-weight: 400;
+  src:
+    local('Delicious Handrawn'),
+    url('https://fonts.cdnfonts.com/s/107204/DeliciousHandrawn-Regular.woff') format('woff');
+}
+@font-face {
+  font-family: 'Sweet';
+  font-style: normal;
+  font-weight: 400;
+  src:
+    local('Sweet'),
+    url('https://fonts.cdnfonts.com/s/107137/SweetBulky-BF6549f20d22893.woff') format('woff');
+}
+
+#location-description {
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 10px;
+  margin: 10px;
+  font-family: 'Comic Sans Ms';
+  line-height: 1.5rem;
+  color: #eee;
+}
+
+.status-field {
+  display: flex;
+  column-gap: 20px;
+}

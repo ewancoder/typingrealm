@@ -1,0 +1,67 @@
+@font-face {
+  font-family: 'Bhlingglers';
+  font-style: normal;
+  font-weight: 400;
+  src:
+    local(''),
+    url(https://fonts.cdnfonts.com/s/107521/Bhlingglers-L3nog.woff) format('woff');
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  background-color: black;
+  overflow: hidden;
+
+  font-family: 'Bhlingglers', serif;
+  font-size: 1.3rem;
+  color: white;
+}
+
+.cursor {
+  text-decoration: underline;
+  text-decoration-color: #99f;
+}
+
+.corrected {
+  color: #999;
+  background-color: rgba(90, 50, 100, 0.5);
+}
+
+.typed {
+  color: #999;
+  background-color: rgba(50, 50, 50, 0.5);
+}
+
+.styled {
+  visibility: hidden;
+}
+
+.typed-styled {
+  color: #333;
+}
+
+.wrong {
+  color: #f99 !important;
+  background-color: rgba(160, 50, 50, 0.7) !important;
+}
+
+.was-wrong {
+  color: #a5a;
+}
+
+.space-was-wrong {
+  text-decoration: underline #d9d;
+}
+
+.tyr-typing {
+  font-size: 1.5rem;
+  font-family: monospace;
+  padding: 0 10px;
+  color: #222;
+  background-color: #ddd;
+  opacity: 0.8;
+  margin: 10px;
+}

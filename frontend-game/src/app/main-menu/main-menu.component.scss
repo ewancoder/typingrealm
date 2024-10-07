@@ -1,0 +1,25 @@
+.main {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #111;
+}
+
+.main-menu-background {
+  background-image: url('/assets/menu/background.png');
+  background-position: center;
+}
+
+.caption {
+  width: 500px;
+}
+
+.intro {
+  margin: 100px;
+  color: #ddd;
+  font-size: 1.1rem;
+  text-align: justify;
+  max-width: 1000px;
+}

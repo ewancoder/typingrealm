@@ -1,0 +1,10 @@
+<div class="main">
+  <div>Loading...</div>
+  <div class="progress-bar" [ngClass]="{ 'progress-bar-hd': hd.enabled }">
+    <div
+      class="progress-bar-progress"
+      [style.width.%]="resourcesLoading | async"
+      [ngClass]="{ 'progress-bar-progress-hd': hd.enabled }"></div>
+    <div class="progress-bar-background" [ngClass]="{ 'progress-bar-background-hd': hd.enabled }"></div>
+  </div>
+</div>
