@@ -44,7 +44,7 @@ services:
     image: postgres:16
     container_name: dev-typingrealm-typing-postgres
     ports:
-      - 10133:5432 # Port shouldn't be exposed in production.
+      - 20132:5432 # Port shouldn't be exposed in production.
     volumes:
       - /data/typingrealm/dev/typing/postgres:/var/lib/postgresql/data
     restart: unless-stopped
@@ -52,3 +52,26 @@ services:
     mem_reservation: 750m
     env_file:
       - /data/typingrealm/dev/typing/.env
+
+  dev-typingrealm-game:
+    image: ghcr.io/ewancoder/typingrealm-game:develop
+    container_name: dev-typingrealm-game
+    restart: unless-stopped
+    mem_limit: 1g
+    mem_reservation: 750m
+    env_file:
+      - /data/typingrealm/dev/game/.env
+      - /data/typingrealm/dev/game/secrets.env
+
+  dev-typingrealm-game-postgres:
+    image: postgres:16
+    container_name: dev-typingrealm-game-postgres
+    ports:
+      - 20133:5432 # Port shouldn't be exposed in production.
+    volumes:
+      - /data/typingrealm/dev/game/postgres:/var/lib/postgresql/data
+    restart: unless-stopped
+    mem_limit: 1g
+    mem_reservation: 750m
+    env_file:
+      - /data/typingrealm/dev/game/.env

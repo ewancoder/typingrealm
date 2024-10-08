@@ -62,7 +62,7 @@ jobs:
         maxColorRange: 80
         minColorRange: 3
 
-  build-api:
+  build-typing-api:
     runs-on: ubuntu-latest
     needs: test-api
 
@@ -94,6 +94,41 @@ jobs:
         push: true
         context: ./backend
         file: backend/TypingRealm.Typing.Api/Dockerfile-production
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+
+  build-game-api:
+    runs-on: ubuntu-latest
+    needs: test-api
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Login to GitHub Container registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/ewancoder/typingrealm-game
+
+    - name: Build and push API Docker image
+      id: push
+      uses: docker/build-push-action@v6
+      with:
+        push: true
+        context: ./backend
+        file: backend/TypingRealm.Game.Api/Dockerfile-production
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
 
@@ -229,7 +264,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    needs: [build-api, build-web-ui, build-game-web-ui]
+    needs: [build-typing-api, build-web-ui, build-game-web-ui]
 
     permissions:
       contents: read
@@ -251,7 +286,7 @@ jobs:
   deploy-dev:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/develop'
-    needs: [build-api, build-web-ui, build-game-web-ui]
+    needs: [build-typing-api, build-web-ui, build-game-web-ui]
 
     permissions:
       contents: read
