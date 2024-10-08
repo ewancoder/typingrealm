@@ -1,6 +1,32 @@
 # TypingRealm
 
+![license](https://img.shields.io/github/license/ewancoder/typingrealm?color=blue)
+![activity](https://img.shields.io/github/commit-activity/m/ewancoder/typingrealm)
+
+## Production status
+
+![ci](https://github.com/ewancoder/typingrealm/actions/workflows/deploy.yml/badge.svg?branch=main)
+![status](https://img.shields.io/github/last-commit/ewancoder/typingrealm/main)
+![api-coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/ewancoder/0184962696ef0364be7a3f491133f2f9/raw/typingrealm-api-coverage-main.json)
+![web-ui-coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/ewancoder/0184962696ef0364be7a3f491133f2f9/raw/typingrealm-game-web-ui-coverage-main.json)
+
+## Development status
+
+![ci](https://github.com/ewancoder/typingrealm/actions/workflows/deploy.yml/badge.svg?branch=develop)
+![status](https://img.shields.io/github/last-commit/ewancoder/typingrealm/develop)
+![diff](https://img.shields.io/github/commits-difference/ewancoder/typingrealm?base=main&head=develop&logo=git&label=diff&color=orange)
+![api-coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/ewancoder/0184962696ef0364be7a3f491133f2f9/raw/typingrealm-api-coverage-develop.json)
+![web-ui-coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/ewancoder/0184962696ef0364be7a3f491133f2f9/raw/typingrealm-game-web-ui-coverage-develop.json)
+
+## What it's about
+
 This is a analytics and training tool to gather statistics and improve your typing. In future, more gaming elements will be added to it until it's a full-fledged game. But the first iteration of this project is simple: gather statistics on typing for future learning and improvement.
+
+The following technologies were used:
+
+- Postgresql
+- Angular (zoneless)
+- Pure JS for maximum performance for typing statistics part
 
 ## Prerequisites
 

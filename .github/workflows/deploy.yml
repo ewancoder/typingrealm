@@ -166,7 +166,7 @@ jobs:
         auth: ${{ secrets.GIST_SECRET }}
         gistID: ${{ secrets.GIST_ID }}
         filename: typingrealm-game-web-ui-coverage-${{ github.ref_name }}.json
-        label: Web UI Coverage
+        label: Game Web UI Coverage
         message: ${{ env.COVERAGE }}%
         valColorRange: ${{ env.COVERAGE }}
         maxColorRange: 80
