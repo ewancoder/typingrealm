@@ -1,3 +1,5 @@
+// Copied from frontend project. Do not modify here.
+
 // TODO: Refactor "styled" style to a separate function. We need performance here.
 export function initializeTypingState(textElement, finishTypingCallback, styled) {
     // Current typing state object.
