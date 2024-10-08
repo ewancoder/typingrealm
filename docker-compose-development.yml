@@ -1,0 +1,54 @@
+version: "3.8"
+
+networks:
+  default:
+    name: typingrealm
+    external: true
+
+services:
+  dev-typingrealm-web:
+    image: ghcr.io/ewancoder/typingrealm-web:develop
+    container_name: dev-typingrealm-web
+    restart: unless-stopped
+    mem_limit: 1g
+    mem_reservation: 750m
+
+  dev-typingrealm-game-web:
+    image: ghcr.io/ewancoder/typingrealm-game-web:develop
+    container_name: dev-typingrealm-game-web
+    restart: unless-stopped
+    mem_limit: 1g
+    mem_reservation: 750m
+
+  dev-typingrealm-typing-1:
+    image: ghcr.io/ewancoder/typingrealm-typing-api:develop
+    container_name: dev-typingrealm-typing-1
+    restart: unless-stopped
+    mem_limit: 1g
+    mem_reservation: 750m
+    env_file:
+      - /data/typingrealm/dev/typing/.env
+      - /data/typingrealm/dev/typing/secrets.env
+
+  dev-typingrealm-typing-2:
+    image: ghcr.io/ewancoder/typingrealm-typing-api:develop
+    container_name: dev-typingrealm-typing-2
+    restart: unless-stopped
+    mem_limit: 1g
+    mem_reservation: 750m
+    env_file:
+      - /data/typingrealm/dev/typing/.env
+      - /data/typingrealm/dev/typing/secrets.env
+
+  dev-typingrealm-typing-postgres:
+    image: postgres:16
+    container_name: dev-typingrealm-typing-postgres
+    ports:
+      - 10133:5432 # Port shouldn't be exposed in production.
+    volumes:
+      - /data/typingrealm/dev/typing/postgres:/var/lib/postgresql/data
+    restart: unless-stopped
+    mem_limit: 1g
+    mem_reservation: 750m
+    env_file:
+      - /data/typingrealm/dev/typing/.env
