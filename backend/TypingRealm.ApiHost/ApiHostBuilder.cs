@@ -20,7 +20,15 @@ public static partial class ApiHostBuilder
         {
             o.AddPolicy(name: "cors", policy =>
             {
-                policy.WithOrigins("https://typingrealm.com", "http://localhost:4200", "https://localhost")
+                // TODO: Only allow production to accept calls from production.
+                // TODO: Also create google cloud credentials separately for production/dev.
+                policy.WithOrigins(
+                    "https://typingrealm.com",
+                    "https://game.typingrealm.com",
+                    "http://localhost:4200",
+                    "https://localhost",
+                    "https://dev.typingrealm.com",
+                    "https://dev.game.typingrealm.com")
                     .AllowAnyMethod() // TODO: allow only specific methods; this was done because delete wasn't allowed by default
                     .WithHeaders("Authorization", "Content-Type");
             });
