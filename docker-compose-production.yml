@@ -39,9 +39,6 @@ services:
   typingrealm-typing-2:
     image: ghcr.io/ewancoder/typingrealm-typing-api:main
     container_name: typingrealm-typing-2
-    build:
-      context: backend/.
-      dockerfile: TypingRealm.Typing.Api/Dockerfile-production
     restart: unless-stopped
     mem_limit: 1g
     mem_reservation: 750m
