@@ -1,0 +1,20 @@
+version: "3.8"
+
+networks:
+  default:
+    name: typingrealm
+    external: true
+
+services:
+  typingrealm-caddy:
+    image: caddy
+    container_name: typingrealm-caddy
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /data/caddy/Caddyfile:/etc/caddy/Caddyfile
+      - /data/caddy/data:/data
+    restart: unless-stopped
+    mem_limit: 1g
+    mem_reservation: 750m

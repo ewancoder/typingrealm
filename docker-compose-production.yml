@@ -6,19 +6,6 @@ networks:
     external: true
 
 services:
-  typingrealm-caddy:
-    image: caddy
-    container_name: typingrealm-caddy
-    ports:
-      - 80:80
-      - 443:443
-    volumes:
-      - /data/caddy/Caddyfile:/etc/caddy/Caddyfile
-      - /data/caddy/data:/data
-    restart: unless-stopped
-    mem_limit: 1g
-    mem_reservation: 750m
-
   typingrealm-web:
     image: ghcr.io/ewancoder/typingrealm-web:main
     container_name: typingrealm-web
