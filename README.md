@@ -30,6 +30,8 @@ The following technologies were used:
 
 ## Prerequisites
 
+> This guide is mildly obsolete. The project is a WIP. The guide will be updated accordingly.
+
 **IMPORTANT**
 
 For the text generation feature to work, you need a working OpenAI API key configured in you secret manager (for local development) or environment variable (for deployment).
