@@ -5,4 +5,5 @@ using TypingRealm.Typing.DataAccess;
 
 var builder = ApiHostBuilder.CreateBuilder();
 builder.Services.AddTransient<ITypingRepository, TypingRepository>();
+builder.Services.AddSingleton(Random.Shared);
 await builder.Build().RunAsync();
