@@ -46,11 +46,8 @@ public sealed class Character
     }
 }
 
-public sealed class Location
+public abstract class WorldUnit
 {
-    [StringLength(50)]
-    public string Id { get; set; } = null!;
-
     [StringLength(100)]
     public string Name { get; set; } = null!;
 
@@ -58,6 +55,12 @@ public sealed class Location
     public string Description { get; set; } = null!;
 
     public IEnumerable<Asset> Assets { get; set; } = null!;
+}
+
+public sealed class Location : WorldUnit
+{
+    [StringLength(50)]
+    public string Id { get; set; } = null!;
 
     [InverseProperty(nameof(LocationPath.FromLocation))]
     public ICollection<LocationPath> Paths { get; set; } = null!;
@@ -91,7 +94,7 @@ public enum AssetType
     Image
 }
 
-public sealed class LocationPath
+public sealed class LocationPath : WorldUnit
 {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Id { get; private set; }
