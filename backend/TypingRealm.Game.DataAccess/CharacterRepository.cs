@@ -3,7 +3,7 @@ using TypingRealm.Framework;
 
 namespace TypingRealm.Game.DataAccess;
 
-public record CharacterInfo(string Name, int Level, long Experience);
+public record CharacterInfo(string CharacterId, string Name, int Level, long Experience);
 
 public sealed class CharacterRepository
 {
@@ -29,6 +29,7 @@ public sealed class CharacterRepository
             ?? throw new InvalidOperationException("Could not find the character for the current profile.");
 
         return new(
+            character.Id,
             character.Name,
             character.Level,
             character.Experience);
