@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TypingRealm.Game.DataAccess;
 
 namespace TypingRealm.Game.Api.Editor;
@@ -8,6 +9,7 @@ public sealed record UpdateLocationDto(string Name, string Description);
 public sealed record CreatePath(string ToLocationId, long DistanceMarks);
 public sealed record UpdatePath(string ToLocationId, long DistanceMarks);
 
+[Authorize]
 [Route("editor/locations")]
 public sealed class LocationsController : ControllerBase
 {
