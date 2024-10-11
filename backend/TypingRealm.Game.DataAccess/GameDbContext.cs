@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,25 +8,6 @@ namespace TypingRealm.Game.DataAccess;
 public sealed class GameDbContext(DbContextOptions<GameDbContext> options) : DbContext(options)
 {
     public required DbSet<Character> Character { get; init; }
-}
-
-[Index(nameof(ProfileId))]
-public class Character
-{
-    [StringLength(50)]
-    public required string Id { get; init; }
-
-    [StringLength(100)]
-    public required string Name { get; init; }
-
-    [StringLength(500)]
-    public required string ProfileId { get; init; }
-
-    [Range(0, 100)]
-    public required int Level { get; init; }
-
-    [Range(0, long.MaxValue)]
-    public long Experience { get; init; }
 }
 
 public static class RegistrationExtensions
