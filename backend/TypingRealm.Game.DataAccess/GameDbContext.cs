@@ -8,6 +8,8 @@ namespace TypingRealm.Game.DataAccess;
 public sealed class GameDbContext(DbContextOptions<GameDbContext> options) : DbContext(options)
 {
     public required DbSet<Character> Character { get; init; }
+    public required DbSet<Location> Location { get; init; }
+    public required DbSet<Asset> Asset { get; init; }
 }
 
 public static class RegistrationExtensions

@@ -6,7 +6,7 @@ namespace TypingRealm.Game.Api.Controllers;
 
 [Authorize]
 [Route("api/characters")]
-public class CharacterController
+public class CharacterController : ControllerBase
 {
     private readonly CharacterRepository _characterRepository;
 

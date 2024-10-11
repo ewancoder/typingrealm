@@ -49,7 +49,7 @@ public sealed class Character
 public sealed class Location
 {
     [StringLength(50)]
-    public string Id { get; private set; } = null!;
+    public string Id { get; set; } = null!;
 
     [StringLength(100)]
     public string Name { get; set; } = null!;
@@ -59,11 +59,11 @@ public sealed class Location
 
     public IEnumerable<Asset> Assets { get; set; } = null!;
 
-    [InverseProperty(nameof(LocationPath.Location))]
-    public IEnumerable<LocationPath> Paths { get; set; } = null!;
+    [InverseProperty(nameof(LocationPath.FromLocation))]
+    public ICollection<LocationPath> Paths { get; set; } = null!;
 
     [InverseProperty(nameof(LocationPath.ToLocation))]
-    public IEnumerable<LocationPath> InversePaths { get; set; } = null!;
+    public ICollection<LocationPath> InversePaths { get; set; } = null!;
 }
 
 public sealed record LocationId(string value)
@@ -96,9 +96,9 @@ public sealed class LocationPath
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Id { get; private set; }
 
-    [ForeignKey(nameof(Location))]
-    public string LocationId { get; set; } = null!;
-    public Location Location { get; set; } = null!;
+    [ForeignKey(nameof(FromLocation))]
+    public string FromLocationId { get; set; } = null!;
+    public Location FromLocation { get; set; } = null!;
 
     [ForeignKey(nameof(ToLocation))]
     public string ToLocationId { get; set; } = null!;
