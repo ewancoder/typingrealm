@@ -11,6 +11,7 @@ COPY ["Directory.Packages.props", "."]
 COPY ["TypingRealm.ApiHost/TypingRealm.ApiHost.csproj", "TypingRealm.ApiHost/"]
 COPY ["TypingRealm.Framework/TypingRealm.Framework.csproj", "TypingRealm.Framework/"]
 COPY ["TypingRealm.Game.Api/TypingRealm.Game.Api.csproj", "TypingRealm.Game.Api/"]
+COPY ["TypingRealm.Game.DataAccess/TypingRealm.Game.DataAccess.csproj", "TypingRealm.Game.DataAccess/"]
 RUN dotnet restore "./TypingRealm.Game.Api/TypingRealm.Game.Api.csproj"
 COPY . .
 WORKDIR "/src/TypingRealm.Game.Api"

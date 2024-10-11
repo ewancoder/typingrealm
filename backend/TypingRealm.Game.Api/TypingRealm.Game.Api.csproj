@@ -14,6 +14,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TypingRealm.ApiHost\TypingRealm.ApiHost.csproj" />
+    <ProjectReference Include="..\TypingRealm.Game.DataAccess\TypingRealm.Game.DataAccess.csproj" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
 </Project>
