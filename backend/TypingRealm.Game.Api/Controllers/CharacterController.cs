@@ -1,24 +1,30 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TypingRealm.Game.DataAccess;
 
 namespace TypingRealm.Game.Api.Controllers;
-
-public record CharacterInfo(string Name, int Level, long Experience, long Wood, decimal AxeCondition);
 
 [Authorize]
 [Route("api/characters")]
 public class CharacterController
 {
-    private long _wood = 10;
-    private decimal _axeCondition = 100;
+    private readonly CharacterRepository _characterRepository;
+
+    public CharacterController(CharacterRepository characterRepository)
+    {
+        _characterRepository = characterRepository;
+    }
 
     [HttpGet]
     [Route("me")]
-    public async ValueTask<CharacterInfo> GetMe(int errors = 0)
+    public ValueTask<CharacterInfo> GetMe()
     {
-        _wood += 2;
-        _axeCondition -= 0.5m * errors;
+        return _characterRepository.GetCurrentCharacterInfoAsync();
+    }
 
-        return new("Ivan", 80, 348_818_283_182_283_481, _wood, _axeCondition);
+    [HttpPost]
+    public ValueTask CreateNew(CreateCharacterDto createCharacterDto)
+    {
+        return _characterRepository.CreateCharacterAsync(createCharacterDto);
     }
 }

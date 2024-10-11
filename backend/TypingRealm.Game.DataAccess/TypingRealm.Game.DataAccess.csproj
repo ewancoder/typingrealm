@@ -4,4 +4,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TypingRealm.Framework\TypingRealm.Framework.csproj" />
+  </ItemGroup>
 </Project>
