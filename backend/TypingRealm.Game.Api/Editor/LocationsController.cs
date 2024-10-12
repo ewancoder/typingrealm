@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TypingRealm.Game.DataAccess;
 
 namespace TypingRealm.Game.Api.Editor;
@@ -9,8 +10,8 @@ public sealed record UpdateLocationDto(string Name, string Description);
 public sealed record CreatePath(string ToLocationId, long DistanceMarks);
 public sealed record UpdatePath(string ToLocationId, long DistanceMarks);
 
-[Authorize]
-[Route("editor/locations")]
+[Authorize] // TODO: Only allow ADMINS to manage the editor.
+[Route("api/editor/locations")]
 public sealed class LocationsController : ControllerBase
 {
     private readonly GameDbContext _dbContext;
@@ -18,6 +19,13 @@ public sealed class LocationsController : ControllerBase
     public LocationsController(GameDbContext dbContext)
     {
         _dbContext = dbContext;
+    }
+
+    [HttpGet]
+    public async ValueTask<IEnumerable<Location>> GetAllLocations()
+    {
+        return await _dbContext.Location
+            .ToListAsync();
     }
 
     [HttpPost]

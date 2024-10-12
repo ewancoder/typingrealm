@@ -81,6 +81,7 @@ public sealed class Asset
 
     public AssetType Type { get; set; }
 
+    // TODO: Do not store data here, just save a unique id and serve it from somewhere.
     public byte[] Data { get; set; } = null!;
 
     // For future sorting in the editor.

@@ -1,6 +1,7 @@
 // Copied from frontend project. Do not modify here.
 
 import { Injectable, signal } from '@angular/core';
+import { from, Observable } from 'rxjs';
 import { createLock } from './lock.js';
 
 let _getToken: (() => Promise<string>) | undefined = undefined;
@@ -19,6 +20,10 @@ export class AuthService {
     private token: string | undefined = undefined;
     private lock = createLock();
     public needsAuthSignal = signal(true);
+
+    getToken$(): Observable<string> {
+        return from(this.getToken());
+    }
 
     /** Gets authentication token either from cache or from authentication
      * provider, and then caches it. */
