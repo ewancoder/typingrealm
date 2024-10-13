@@ -5,9 +5,9 @@ using TypingRealm.Game.DataAccess;
 
 namespace TypingRealm.Game.Api.Editor;
 
-public sealed record CreateLocationDto(string Name, string Description);
+public sealed record CreateLocationDto(string Name, string Description, string Path);
 public sealed record UpdateLocationDto(string Name, string Description);
-public sealed record CreatePath(string ToLocationId, long DistanceMarks);
+public sealed record CreatePath(string Name, string Description, string ToLocationId, long DistanceMarks);
 public sealed record UpdatePath(string ToLocationId, long DistanceMarks);
 
 [Authorize] // TODO: Only allow ADMINS to manage the editor.
@@ -35,7 +35,8 @@ public sealed class LocationsController : ControllerBase
         {
             Id = Guid.NewGuid().ToString(),
             Name = dto.Name,
-            Description = dto.Description
+            Description = dto.Description,
+            Path = dto.Path
         };
 
         await _dbContext.Location.AddAsync(location);
@@ -104,6 +105,8 @@ public sealed class LocationsController : ControllerBase
 
         var path = new LocationPath
         {
+            Name = createPath.Name,
+            Description = createPath.Description,
             FromLocation = location,
             ToLocationId = createPath.ToLocationId,
             DistanceMarks = createPath.DistanceMarks

@@ -49,10 +49,10 @@ public sealed class Character
 public abstract class WorldUnit
 {
     [StringLength(100)]
-    public string Name { get; set; } = null!;
+    public required string Name { get; set; } = null!;
 
     [StringLength(10_000)]
-    public string Description { get; set; } = null!;
+    public required string Description { get; set; } = null!;
 
     public ICollection<Asset> Assets { get; set; } = null!;
 }
@@ -60,7 +60,7 @@ public abstract class WorldUnit
 public sealed class Location : WorldUnit
 {
     [StringLength(50)]
-    public string Id { get; set; } = null!;
+    public required string Id { get; set; } = null!;
 
     [InverseProperty(nameof(LocationPath.FromLocation))]
     public ICollection<LocationPath> Paths { get; set; } = null!;
@@ -70,7 +70,7 @@ public sealed class Location : WorldUnit
     /// Arbitrary path of a world unit for categorization.
     /// </summary>
     [StringLength(500)]
-    public string Path { get; set; } = null!;
+    public required string Path { get; set; } = null!;
 
     [InverseProperty(nameof(LocationPath.ToLocation))]
     public ICollection<LocationPath> InversePaths { get; set; } = null!;
