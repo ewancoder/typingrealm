@@ -65,6 +65,13 @@ public sealed class Location : WorldUnit
     [InverseProperty(nameof(LocationPath.FromLocation))]
     public ICollection<LocationPath> Paths { get; set; } = null!;
 
+    // TODO: Consider renaming LocationPath to LocationRoute cause there's a Path is just for categorization.
+    /// <summary>
+    /// Arbitrary path of a world unit for categorization.
+    /// </summary>
+    [StringLength(500)]
+    public string Path { get; set; } = null!;
+
     [InverseProperty(nameof(LocationPath.ToLocation))]
     public ICollection<LocationPath> InversePaths { get; set; } = null!;
 }
