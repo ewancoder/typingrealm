@@ -54,7 +54,7 @@ public abstract class WorldUnit
     [StringLength(10_000)]
     public string Description { get; set; } = null!;
 
-    public IEnumerable<Asset> Assets { get; set; } = null!;
+    public ICollection<Asset> Assets { get; set; } = null!;
 }
 
 public sealed class Location : WorldUnit
@@ -77,7 +77,7 @@ public sealed record LocationId(string value)
 public sealed class Asset
 {
     [StringLength(50)]
-    public string Id { get; private set; } = null!;
+    public string Id { get; set; } = null!;
 
     public AssetType Type { get; set; }
 
