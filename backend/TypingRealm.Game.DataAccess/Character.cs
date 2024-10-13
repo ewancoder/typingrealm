@@ -57,6 +57,7 @@ public abstract class WorldUnit
     public ICollection<Asset> Assets { get; set; } = null!;
 }
 
+[Index(nameof(Path))]
 public sealed class Location : WorldUnit
 {
     [StringLength(50)]
@@ -81,6 +82,7 @@ public sealed record LocationId(string value)
     public static readonly string Start = "start";
 }
 
+[Index(nameof(Path))]
 public sealed class Asset
 {
     [StringLength(50)]
@@ -88,12 +90,11 @@ public sealed class Asset
 
     public AssetType Type { get; set; }
 
-    // TODO: Do not store data here, just save a unique id and serve it from somewhere.
-    public byte[] Data { get; set; } = null!;
-
     // For future sorting in the editor.
     [StringLength(500)]
     public string Path { get; set; } = null!;
+
+    public string FilePath { get; set; } = null!;
 }
 
 public enum AssetType
