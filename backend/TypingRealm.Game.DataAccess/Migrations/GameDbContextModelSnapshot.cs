@@ -29,10 +29,10 @@ namespace TypingRealm.Game.DataAccess.Migrations
                         .HasColumnType("character varying(50)")
                         .HasColumnName("id");
 
-                    b.Property<byte[]>("Data")
+                    b.Property<string>("FilePath")
                         .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("data");
+                        .HasColumnType("text")
+                        .HasColumnName("file_path");
 
                     b.Property<string>("LocationId")
                         .HasColumnType("character varying(50)")
@@ -60,6 +60,9 @@ namespace TypingRealm.Game.DataAccess.Migrations
 
                     b.HasIndex("LocationPathId")
                         .HasDatabaseName("ix_asset_location_path_id");
+
+                    b.HasIndex("Path")
+                        .HasDatabaseName("ix_asset_path");
 
                     b.ToTable("asset", (string)null);
                 });

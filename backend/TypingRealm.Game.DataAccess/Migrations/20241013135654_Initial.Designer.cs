@@ -12,8 +12,8 @@ using TypingRealm.Game.DataAccess;
 namespace TypingRealm.Game.DataAccess.Migrations
 {
     [DbContext(typeof(GameDbContext))]
-    [Migration("20241013132314_AddCatalogPathToLocation")]
-    partial class AddCatalogPathToLocation
+    [Migration("20241013135654_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,10 +32,10 @@ namespace TypingRealm.Game.DataAccess.Migrations
                         .HasColumnType("character varying(50)")
                         .HasColumnName("id");
 
-                    b.Property<byte[]>("Data")
+                    b.Property<string>("FilePath")
                         .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("data");
+                        .HasColumnType("text")
+                        .HasColumnName("file_path");
 
                     b.Property<string>("LocationId")
                         .HasColumnType("character varying(50)")
@@ -63,6 +63,9 @@ namespace TypingRealm.Game.DataAccess.Migrations
 
                     b.HasIndex("LocationPathId")
                         .HasDatabaseName("ix_asset_location_path_id");
+
+                    b.HasIndex("Path")
+                        .HasDatabaseName("ix_asset_path");
 
                     b.ToTable("asset", (string)null);
                 });
@@ -138,6 +141,9 @@ namespace TypingRealm.Game.DataAccess.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_location");
+
+                    b.HasIndex("Path")
+                        .HasDatabaseName("ix_location_path");
 
                     b.ToTable("location", (string)null);
                 });
