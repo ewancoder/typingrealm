@@ -24,6 +24,25 @@ export class LocationService {
             )
         );
     }
+
+    addLocation$(createLocation: CreateLocation): Observable<Location> {
+        const body = createLocation;
+
+        return this.auth.getToken$().pipe(
+            switchMap(token =>
+                this.http.post<Location>(uri, body, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                })
+            )
+        );
+    }
+}
+
+export interface CreateLocation {
+    name: string;
+    description: string;
 }
 
 export interface WorldUnit {
