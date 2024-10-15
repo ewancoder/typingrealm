@@ -1,5 +1,5 @@
 import { NgClass } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NetworkWarningComponent } from './network-warning/network-warning.component';
 
@@ -12,7 +12,8 @@ import './auth/google-auth';
     standalone: true,
     imports: [RouterOutlet, NgClass, NetworkWarningComponent, AuthComponent],
     templateUrl: './app.component.html',
-    styleUrl: './app.component.scss'
+    styleUrl: './app.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent implements OnInit {
     title = 'typingrealm';

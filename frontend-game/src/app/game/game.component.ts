@@ -1,4 +1,13 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, Renderer2, signal, ViewChild } from '@angular/core';
+import {
+    AfterViewInit,
+    ChangeDetectionStrategy,
+    Component,
+    ElementRef,
+    OnDestroy,
+    Renderer2,
+    signal,
+    ViewChild
+} from '@angular/core';
 import { ResourceLoadService } from '../resource-load.service';
 import { TypingService } from '../typing.service';
 
@@ -7,7 +16,8 @@ import { TypingService } from '../typing.service';
     standalone: true,
     imports: [],
     templateUrl: './game.component.html',
-    styleUrl: './game.component.scss'
+    styleUrl: './game.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GameComponent implements AfterViewInit, OnDestroy {
     @ViewChild('locationPicture') locationPicture!: ElementRef<HTMLDivElement>;
