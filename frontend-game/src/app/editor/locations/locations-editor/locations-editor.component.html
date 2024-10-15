@@ -9,3 +9,10 @@
   </div>
   <button type="submit" [disabled]="!newLocationForm.valid">Create</button>
 </form>
+
+@for (location of locations$ | async; track location.id) {
+  <div>
+    <div>{{ location.name }}</div>
+    <div>{{ location.description }}</div>
+  </div>
+}
