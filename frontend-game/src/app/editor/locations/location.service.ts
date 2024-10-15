@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, switchMap } from 'rxjs';
+import { Observable, Subject, switchMap, tap } from 'rxjs';
 import { AuthService } from '../../auth/auth.service';
 
 //const uri = 'https://dev.api.typingrealm.com/game/api/locations';
@@ -8,12 +8,18 @@ const uri = 'http://localhost:5001/api/editor/locations';
 
 @Injectable({ providedIn: 'root' })
 export class LocationService {
+    locations$: Subject<Location[]> = new Subject<Location[]>();
+
     constructor(
         private http: HttpClient,
         private auth: AuthService
-    ) {}
+    ) {
+        this.getLocations$().subscribe(locations => {
+            this.locations$.next(locations);
+        });
+    }
 
-    getLocations$(): Observable<Location[]> {
+    private getLocations$(): Observable<Location[]> {
         return this.auth.getToken$().pipe(
             switchMap(token =>
                 this.http.get<Location[]>(uri, {
@@ -35,7 +41,12 @@ export class LocationService {
                         Authorization: `Bearer ${token}`
                     }
                 })
-            )
+            ),
+            tap(() => {
+                this.getLocations$().subscribe(locations => {
+                    this.locations$.next(locations);
+                });
+            })
         );
     }
 }
@@ -43,6 +54,7 @@ export class LocationService {
 export interface CreateLocation {
     name: string;
     description: string;
+    path: string;
 }
 
 export interface WorldUnit {

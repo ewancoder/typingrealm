@@ -21,10 +21,18 @@ export class LocationsEditorComponent {
     });
 
     constructor(private locationService: LocationService) {
-        this.locations$ = locationService.getLocations$();
+        this.locations$ = locationService.locations$;
     }
 
     onSubmit() {
-        console.log(this.newLocationForm.value);
+        this.locationService
+            .addLocation$({
+                name: this.newLocationForm.value.name as string,
+                description: this.newLocationForm.value.description as string,
+                path: this.newLocationForm.value.name as string
+            })
+            .subscribe();
+
+        this.newLocationForm.reset();
     }
 }
