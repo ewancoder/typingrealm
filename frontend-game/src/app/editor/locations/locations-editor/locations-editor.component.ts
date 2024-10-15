@@ -1,13 +1,14 @@
 import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
 import { Location, LocationService } from '../location.service';
 
 @Component({
     selector: 'tyr-locations-editor',
     standalone: true,
-    imports: [ReactiveFormsModule, AsyncPipe],
+    imports: [ReactiveFormsModule, AsyncPipe, RouterLink],
     templateUrl: './locations-editor.component.html',
     styleUrl: './locations-editor.component.scss',
     encapsulation: ViewEncapsulation.None,

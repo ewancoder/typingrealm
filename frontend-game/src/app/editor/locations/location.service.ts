@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, Subject, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, Observable, switchMap, tap } from 'rxjs';
 import { AuthService } from '../../auth/auth.service';
 
 //const uri = 'https://dev.api.typingrealm.com/game/api/locations';
@@ -8,7 +8,7 @@ const uri = 'http://localhost:5001/api/editor/locations';
 
 @Injectable({ providedIn: 'root' })
 export class LocationService {
-    locations$: Subject<Location[]> = new Subject<Location[]>();
+    locations$: BehaviorSubject<Location[]> = new BehaviorSubject<Location[]>([]);
 
     constructor(
         private http: HttpClient,
@@ -49,6 +49,29 @@ export class LocationService {
             })
         );
     }
+
+    updateLocation$(locationId: string, updateLocation: UpdateLocation) {
+        return this.auth.getToken$().pipe(
+            switchMap(token =>
+                this.http.put<Location>(uri + '/' + locationId, updateLocation, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                })
+            ),
+            tap(() => {
+                this.getLocations$().subscribe(locations => {
+                    this.locations$.next(locations);
+                });
+            })
+        );
+    }
+}
+
+export interface UpdateLocation {
+    name: string;
+    description: string;
+    path: string;
 }
 
 export interface CreateLocation {
@@ -65,6 +88,7 @@ export interface WorldUnit {
 
 export interface Location extends WorldUnit {
     id: string;
+    path: string;
     paths: LocationPath[];
     inversePaths: LocationPath[];
 }

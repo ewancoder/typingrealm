@@ -5,7 +5,7 @@
   </div>
   <div>
     <label for="description">Description: </label>
-    <input type="text" formControlName="description" />
+    <textarea type="text" formControlName="description"></textarea>
   </div>
   <button type="submit" [disabled]="!newLocationForm.valid">Create</button>
 </form>
@@ -14,5 +14,6 @@
   <div>
     <div>{{ location.name }}</div>
     <div>{{ location.description }}</div>
+    <a routerLink="{{ location.id }}">Edit</a>
   </div>
 }
