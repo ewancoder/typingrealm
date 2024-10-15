@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnDestroy, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { Location, LocationService } from '../location.service';
@@ -12,8 +12,8 @@ import { Location, LocationService } from '../location.service';
     changeDetection: ChangeDetectionStrategy.OnPush,
     encapsulation: ViewEncapsulation.None
 })
-export class LocationEditorComponent implements OnDestroy {
-    subscription: Subscription;
+export class LocationEditorComponent implements OnDestroy, OnInit {
+    subscription!: Subscription;
     @Input({ required: true }) locationId!: string;
     location: Location | undefined;
     updateLocationForm = new FormGroup({
@@ -22,8 +22,10 @@ export class LocationEditorComponent implements OnDestroy {
         path: new FormControl('', Validators.required)
     });
 
-    constructor(private locationService: LocationService) {
-        this.subscription = locationService.locations$.subscribe(locations => {
+    constructor(private locationService: LocationService) {}
+
+    ngOnInit() {
+        this.subscription = this.locationService.locations$.subscribe(locations => {
             this.location = locations.find(x => x.id === this.locationId);
             if (this.location) {
                 this.updateLocationForm.setValue({
@@ -40,10 +42,12 @@ export class LocationEditorComponent implements OnDestroy {
     }
 
     updateInfo() {
-        this.locationService.updateLocation$(this.locationId, {
-            name: this.updateLocationForm.value.name as string,
-            description: this.updateLocationForm.value.description as string,
-            path: this.updateLocationForm.value.path as string
-        });
+        this.locationService
+            .updateLocation$(this.locationId, {
+                name: this.updateLocationForm.value.name as string,
+                description: this.updateLocationForm.value.description as string,
+                path: this.updateLocationForm.value.path as string
+            })
+            .subscribe();
     }
 }

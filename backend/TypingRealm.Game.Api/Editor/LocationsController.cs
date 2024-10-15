@@ -6,7 +6,7 @@ using TypingRealm.Game.DataAccess;
 namespace TypingRealm.Game.Api.Editor;
 
 public sealed record CreateLocationDto(string Name, string Description, string Path);
-public sealed record UpdateLocationDto(string Name, string Description);
+public sealed record UpdateLocationDto(string Name, string Description, string Path);
 public sealed record CreatePath(string Name, string Description, string ToLocationId, long DistanceMarks);
 public sealed record UpdatePath(string ToLocationId, long DistanceMarks);
 
@@ -56,6 +56,7 @@ public sealed class LocationsController : ControllerBase
         // TODO: Move this logic to Location DAO class.
         location.Name = dto.Name;
         location.Description = dto.Description;
+        location.Path = dto.Path;
 
         await _dbContext.SaveChangesAsync();
         return Ok();

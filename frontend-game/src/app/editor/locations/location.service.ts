@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, map, Observable, switchMap, tap } from 'rxjs';
 import { AuthService } from '../../auth/auth.service';
 
 //const uri = 'https://dev.api.typingrealm.com/game/api/locations';
@@ -8,14 +8,18 @@ const uri = 'http://localhost:5001/api/editor/locations';
 
 @Injectable({ providedIn: 'root' })
 export class LocationService {
-    locations$: BehaviorSubject<Location[]> = new BehaviorSubject<Location[]>([]);
+    private _locationsSubject: BehaviorSubject<Location[]> = new BehaviorSubject<Location[]>([]);
+    locations$!: Observable<Location[]>;
 
     constructor(
         private http: HttpClient,
         private auth: AuthService
     ) {
+        this.locations$ = this._locationsSubject.pipe(
+            map(locations => locations.sort((left, right) => (left.name < right.name ? -1 : 1)))
+        );
         this.getLocations$().subscribe(locations => {
-            this.locations$.next(locations);
+            this._locationsSubject.next(locations);
         });
     }
 
@@ -44,7 +48,7 @@ export class LocationService {
             ),
             tap(() => {
                 this.getLocations$().subscribe(locations => {
-                    this.locations$.next(locations);
+                    this._locationsSubject.next(locations);
                 });
             })
         );
@@ -61,7 +65,7 @@ export class LocationService {
             ),
             tap(() => {
                 this.getLocations$().subscribe(locations => {
-                    this.locations$.next(locations);
+                    this._locationsSubject.next(locations);
                 });
             })
         );
