@@ -63,8 +63,8 @@ public sealed class Location : WorldUnit
     [StringLength(50)]
     public required string Id { get; set; } = null!;
 
-    [InverseProperty(nameof(LocationPath.FromLocation))]
-    public ICollection<LocationPath> Paths { get; set; } = null!;
+    [InverseProperty(nameof(LocationRoute.FromLocation))]
+    public ICollection<LocationRoute> Routes { get; set; } = null!;
 
     // TODO: Consider renaming LocationPath to LocationRoute cause there's a Path is just for categorization.
     /// <summary>
@@ -73,8 +73,8 @@ public sealed class Location : WorldUnit
     [StringLength(500)]
     public required string Path { get; set; } = null!;
 
-    [InverseProperty(nameof(LocationPath.ToLocation))]
-    public ICollection<LocationPath> InversePaths { get; set; } = null!;
+    [InverseProperty(nameof(LocationRoute.ToLocation))]
+    public ICollection<LocationRoute> InverseRoutes { get; set; } = null!;
 }
 
 public sealed record LocationId(string value)
@@ -103,7 +103,7 @@ public enum AssetType
     Image
 }
 
-public sealed class LocationPath : WorldUnit
+public sealed class LocationRoute : WorldUnit
 {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Id { get; private set; }
@@ -122,8 +122,8 @@ public sealed class LocationPath : WorldUnit
 [Owned]
 public sealed class MovementProgress
 {
-    public long LocationPathId { get; set; }
-    public LocationPath LocationPath { get; set; } = null!;
+    public long LocationRouteId { get; set; }
+    public LocationRoute LocationRoute { get; set; } = null!;
 
     public long DistanceMarks { get; set; }
 }

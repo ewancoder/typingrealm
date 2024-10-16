@@ -7,8 +7,8 @@ namespace TypingRealm.Game.Api.Editor;
 
 public sealed record CreateLocationDto(string Name, string Description, string Path);
 public sealed record UpdateLocationDto(string Name, string Description, string Path);
-public sealed record CreatePath(string Name, string Description, string ToLocationId, long DistanceMarks);
-public sealed record UpdatePath(string ToLocationId, long DistanceMarks);
+public sealed record CreateRoute(string Name, string Description, string ToLocationId, long DistanceMarks);
+public sealed record UpdateRoute(string ToLocationId, long DistanceMarks);
 
 [Authorize] // TODO: Only allow ADMINS to manage the editor.
 [Route("api/editor/locations")]
@@ -97,14 +97,14 @@ public sealed class LocationsController : ControllerBase
     }
 
     [HttpPost]
-    [Route("{locationId}/paths")]
-    public async ValueTask<ActionResult<LocationPath>> CreatePath(string locationId, CreatePath createPath)
+    [Route("{locationId}/routes")]
+    public async ValueTask<ActionResult<LocationRoute>> CreateRoute(string locationId, CreateRoute createPath)
     {
         var location = await _dbContext.Location.FindAsync(locationId);
         if (location is null)
             return NotFound();
 
-        var path = new LocationPath
+        var path = new LocationRoute
         {
             Name = createPath.Name,
             Description = createPath.Description,
@@ -113,28 +113,28 @@ public sealed class LocationsController : ControllerBase
             DistanceMarks = createPath.DistanceMarks
         };
 
-        location.Paths.Add(path);
+        location.Routes.Add(path);
         await _dbContext.SaveChangesAsync();
         return path;
     }
 
     [HttpPut]
-    [Route("{locationId}/paths/{pathId}")]
-    public async ValueTask<ActionResult<LocationPath>> UpdatePath(
-        string locationId, long pathId, UpdatePath updatePath)
+    [Route("{locationId}/routes/{routeId}")]
+    public async ValueTask<ActionResult<LocationRoute>> UpdatePath(
+        string locationId, long routeId, UpdateRoute updateRoute)
     {
         var location = await _dbContext.Location.FindAsync(locationId);
         if (location is null)
             return NotFound();
 
-        var existingPath = location.Paths.FirstOrDefault(p => p.Id == pathId);
-        if (existingPath is null)
+        var existingRoute = location.Routes.FirstOrDefault(p => p.Id == routeId);
+        if (existingRoute is null)
             return NotFound();
 
-        existingPath.ToLocationId = updatePath.ToLocationId;
-        existingPath.DistanceMarks = updatePath.DistanceMarks;
+        existingRoute.ToLocationId = updateRoute.ToLocationId;
+        existingRoute.DistanceMarks = updateRoute.DistanceMarks;
         await _dbContext.SaveChangesAsync();
-        return existingPath;
+        return existingRoute;
     }
 }
 

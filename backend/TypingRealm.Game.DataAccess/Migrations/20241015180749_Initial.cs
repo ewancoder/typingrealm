@@ -26,7 +26,7 @@ public partial class Initial : Migration
             });
 
         migrationBuilder.CreateTable(
-            name: "location_path",
+            name: "location_route",
             columns: table => new
             {
                 id = table.Column<long>(type: "bigint", nullable: false)
@@ -39,15 +39,15 @@ public partial class Initial : Migration
             },
             constraints: table =>
             {
-                table.PrimaryKey("pk_location_path", x => x.id);
+                table.PrimaryKey("pk_location_route", x => x.id);
                 table.ForeignKey(
-                    name: "fk_location_path_location_from_location_id",
+                    name: "fk_location_route_location_from_location_id",
                     column: x => x.from_location_id,
                     principalTable: "location",
                     principalColumn: "id",
                     onDelete: ReferentialAction.Cascade);
                 table.ForeignKey(
-                    name: "fk_location_path_location_to_location_id",
+                    name: "fk_location_route_location_to_location_id",
                     column: x => x.to_location_id,
                     principalTable: "location",
                     principalColumn: "id",
@@ -63,7 +63,7 @@ public partial class Initial : Migration
                 path = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                 file_path = table.Column<string>(type: "text", nullable: false),
                 location_id = table.Column<string>(type: "character varying(50)", nullable: true),
-                location_path_id = table.Column<long>(type: "bigint", nullable: true)
+                location_route_id = table.Column<long>(type: "bigint", nullable: true)
             },
             constraints: table =>
             {
@@ -74,9 +74,9 @@ public partial class Initial : Migration
                     principalTable: "location",
                     principalColumn: "id");
                 table.ForeignKey(
-                    name: "fk_asset_location_path_location_path_id",
-                    column: x => x.location_path_id,
-                    principalTable: "location_path",
+                    name: "fk_asset_location_route_location_route_id",
+                    column: x => x.location_route_id,
+                    principalTable: "location_route",
                     principalColumn: "id");
             });
 
@@ -90,7 +90,7 @@ public partial class Initial : Migration
                 level = table.Column<int>(type: "integer", nullable: false),
                 experience = table.Column<long>(type: "bigint", nullable: false),
                 location_id = table.Column<string>(type: "character varying(50)", nullable: false),
-                movement_progress_location_path_id = table.Column<long>(type: "bigint", nullable: true),
+                movement_progress_location_route_id = table.Column<long>(type: "bigint", nullable: true),
                 movement_progress_distance_marks = table.Column<long>(type: "bigint", nullable: true)
             },
             constraints: table =>
@@ -103,9 +103,9 @@ public partial class Initial : Migration
                     principalColumn: "id",
                     onDelete: ReferentialAction.Cascade);
                 table.ForeignKey(
-                    name: "fk_character_location_path_movement_progress_location_path_id",
-                    column: x => x.movement_progress_location_path_id,
-                    principalTable: "location_path",
+                    name: "fk_character_location_route_movement_progress_location_route_id",
+                    column: x => x.movement_progress_location_route_id,
+                    principalTable: "location_route",
                     principalColumn: "id",
                     onDelete: ReferentialAction.Cascade);
             });
@@ -116,9 +116,9 @@ public partial class Initial : Migration
             column: "location_id");
 
         migrationBuilder.CreateIndex(
-            name: "ix_asset_location_path_id",
+            name: "ix_asset_location_route_id",
             table: "asset",
-            column: "location_path_id");
+            column: "location_route_id");
 
         migrationBuilder.CreateIndex(
             name: "ix_asset_path",
@@ -131,9 +131,9 @@ public partial class Initial : Migration
             column: "location_id");
 
         migrationBuilder.CreateIndex(
-            name: "ix_character_movement_progress_location_path_id",
+            name: "ix_character_movement_progress_location_route_id",
             table: "character",
-            column: "movement_progress_location_path_id");
+            column: "movement_progress_location_route_id");
 
         migrationBuilder.CreateIndex(
             name: "ix_character_profile_id",
@@ -146,13 +146,13 @@ public partial class Initial : Migration
             column: "path");
 
         migrationBuilder.CreateIndex(
-            name: "ix_location_path_from_location_id",
-            table: "location_path",
+            name: "ix_location_route_from_location_id",
+            table: "location_route",
             column: "from_location_id");
 
         migrationBuilder.CreateIndex(
-            name: "ix_location_path_to_location_id",
-            table: "location_path",
+            name: "ix_location_route_to_location_id",
+            table: "location_route",
             column: "to_location_id");
     }
 
@@ -166,7 +166,7 @@ public partial class Initial : Migration
             name: "character");
 
         migrationBuilder.DropTable(
-            name: "location_path");
+            name: "location_route");
 
         migrationBuilder.DropTable(
             name: "location");

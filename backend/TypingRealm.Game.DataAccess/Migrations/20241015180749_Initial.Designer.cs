@@ -12,7 +12,7 @@ using TypingRealm.Game.DataAccess;
 namespace TypingRealm.Game.DataAccess.Migrations
 {
     [DbContext(typeof(GameDbContext))]
-    [Migration("20241013135654_Initial")]
+    [Migration("20241015180749_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -41,9 +41,9 @@ namespace TypingRealm.Game.DataAccess.Migrations
                         .HasColumnType("character varying(50)")
                         .HasColumnName("location_id");
 
-                    b.Property<long?>("LocationPathId")
+                    b.Property<long?>("LocationRouteId")
                         .HasColumnType("bigint")
-                        .HasColumnName("location_path_id");
+                        .HasColumnName("location_route_id");
 
                     b.Property<string>("Path")
                         .IsRequired()
@@ -61,8 +61,8 @@ namespace TypingRealm.Game.DataAccess.Migrations
                     b.HasIndex("LocationId")
                         .HasDatabaseName("ix_asset_location_id");
 
-                    b.HasIndex("LocationPathId")
-                        .HasDatabaseName("ix_asset_location_path_id");
+                    b.HasIndex("LocationRouteId")
+                        .HasDatabaseName("ix_asset_location_route_id");
 
                     b.HasIndex("Path")
                         .HasDatabaseName("ix_asset_path");
@@ -148,7 +148,7 @@ namespace TypingRealm.Game.DataAccess.Migrations
                     b.ToTable("location", (string)null);
                 });
 
-            modelBuilder.Entity("TypingRealm.Game.DataAccess.LocationPath", b =>
+            modelBuilder.Entity("TypingRealm.Game.DataAccess.LocationRoute", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -184,15 +184,15 @@ namespace TypingRealm.Game.DataAccess.Migrations
                         .HasColumnName("to_location_id");
 
                     b.HasKey("Id")
-                        .HasName("pk_location_path");
+                        .HasName("pk_location_route");
 
                     b.HasIndex("FromLocationId")
-                        .HasDatabaseName("ix_location_path_from_location_id");
+                        .HasDatabaseName("ix_location_route_from_location_id");
 
                     b.HasIndex("ToLocationId")
-                        .HasDatabaseName("ix_location_path_to_location_id");
+                        .HasDatabaseName("ix_location_route_to_location_id");
 
-                    b.ToTable("location_path", (string)null);
+                    b.ToTable("location_route", (string)null);
                 });
 
             modelBuilder.Entity("TypingRealm.Game.DataAccess.Asset", b =>
@@ -202,10 +202,10 @@ namespace TypingRealm.Game.DataAccess.Migrations
                         .HasForeignKey("LocationId")
                         .HasConstraintName("fk_asset_location_location_id");
 
-                    b.HasOne("TypingRealm.Game.DataAccess.LocationPath", null)
+                    b.HasOne("TypingRealm.Game.DataAccess.LocationRoute", null)
                         .WithMany("Assets")
-                        .HasForeignKey("LocationPathId")
-                        .HasConstraintName("fk_asset_location_path_location_path_id");
+                        .HasForeignKey("LocationRouteId")
+                        .HasConstraintName("fk_asset_location_route_location_route_id");
                 });
 
             modelBuilder.Entity("TypingRealm.Game.DataAccess.Character", b =>
@@ -227,14 +227,14 @@ namespace TypingRealm.Game.DataAccess.Migrations
                                 .HasColumnType("bigint")
                                 .HasColumnName("movement_progress_distance_marks");
 
-                            b1.Property<long>("LocationPathId")
+                            b1.Property<long>("LocationRouteId")
                                 .HasColumnType("bigint")
-                                .HasColumnName("movement_progress_location_path_id");
+                                .HasColumnName("movement_progress_location_route_id");
 
                             b1.HasKey("CharacterId");
 
-                            b1.HasIndex("LocationPathId")
-                                .HasDatabaseName("ix_character_movement_progress_location_path_id");
+                            b1.HasIndex("LocationRouteId")
+                                .HasDatabaseName("ix_character_movement_progress_location_route_id");
 
                             b1.ToTable("character");
 
@@ -242,14 +242,14 @@ namespace TypingRealm.Game.DataAccess.Migrations
                                 .HasForeignKey("CharacterId")
                                 .HasConstraintName("fk_character_character_id");
 
-                            b1.HasOne("TypingRealm.Game.DataAccess.LocationPath", "LocationPath")
+                            b1.HasOne("TypingRealm.Game.DataAccess.LocationRoute", "LocationRoute")
                                 .WithMany()
-                                .HasForeignKey("LocationPathId")
+                                .HasForeignKey("LocationRouteId")
                                 .OnDelete(DeleteBehavior.Cascade)
                                 .IsRequired()
-                                .HasConstraintName("fk_character_location_path_movement_progress_location_path_id");
+                                .HasConstraintName("fk_character_location_route_movement_progress_location_route_id");
 
-                            b1.Navigation("LocationPath");
+                            b1.Navigation("LocationRoute");
                         });
 
                     b.Navigation("Location");
@@ -257,21 +257,21 @@ namespace TypingRealm.Game.DataAccess.Migrations
                     b.Navigation("MovementProgress");
                 });
 
-            modelBuilder.Entity("TypingRealm.Game.DataAccess.LocationPath", b =>
+            modelBuilder.Entity("TypingRealm.Game.DataAccess.LocationRoute", b =>
                 {
                     b.HasOne("TypingRealm.Game.DataAccess.Location", "FromLocation")
-                        .WithMany("Paths")
+                        .WithMany("Routes")
                         .HasForeignKey("FromLocationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_location_path_location_from_location_id");
+                        .HasConstraintName("fk_location_route_location_from_location_id");
 
                     b.HasOne("TypingRealm.Game.DataAccess.Location", "ToLocation")
-                        .WithMany("InversePaths")
+                        .WithMany("InverseRoutes")
                         .HasForeignKey("ToLocationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_location_path_location_to_location_id");
+                        .HasConstraintName("fk_location_route_location_to_location_id");
 
                     b.Navigation("FromLocation");
 
@@ -282,12 +282,12 @@ namespace TypingRealm.Game.DataAccess.Migrations
                 {
                     b.Navigation("Assets");
 
-                    b.Navigation("InversePaths");
+                    b.Navigation("InverseRoutes");
 
-                    b.Navigation("Paths");
+                    b.Navigation("Routes");
                 });
 
-            modelBuilder.Entity("TypingRealm.Game.DataAccess.LocationPath", b =>
+            modelBuilder.Entity("TypingRealm.Game.DataAccess.LocationRoute", b =>
                 {
                     b.Navigation("Assets");
                 });
