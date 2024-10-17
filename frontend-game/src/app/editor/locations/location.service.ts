@@ -93,11 +93,11 @@ export interface WorldUnit {
 export interface Location extends WorldUnit {
     id: string;
     path: string;
-    paths: LocationPath[];
-    inversePaths: LocationPath[];
+    routes: LocationRoute[];
+    inverseRoutes: LocationRoute[];
 }
 
-export interface LocationPath extends WorldUnit {
+export interface LocationRoute extends WorldUnit {
     id: number;
     fromLocationId: string;
     toLocationId: string;
