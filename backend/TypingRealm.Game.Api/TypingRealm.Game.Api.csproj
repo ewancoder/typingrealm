@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -14,6 +14,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TypingRealm.ApiHost\TypingRealm.ApiHost.csproj" />
+    <ProjectReference Include="..\TypingRealm.Game.DataAccess\TypingRealm.Game.DataAccess.csproj" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" /> <!-- Installed temporarily, for Editor. Remove after refactoring into repositories. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
 </Project>

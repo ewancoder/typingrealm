@@ -1,4 +1,4 @@
-import { Component, HostListener } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { HdService } from '../loading-screen/loading-screen.component';
 
@@ -7,7 +7,8 @@ import { HdService } from '../loading-screen/loading-screen.component';
     standalone: true,
     imports: [],
     templateUrl: './network-warning.component.html',
-    styleUrl: './network-warning.component.scss'
+    styleUrl: './network-warning.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NetworkWarningComponent {
     constructor(

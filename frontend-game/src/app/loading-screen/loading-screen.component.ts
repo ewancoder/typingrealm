@@ -1,5 +1,5 @@
 import { AsyncPipe, NgClass } from '@angular/common';
-import { Component, Injectable, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injectable, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { finalize, Observable } from 'rxjs';
 import { ResourceLoadService } from '../resource-load.service';
@@ -9,7 +9,8 @@ import { ResourceLoadService } from '../resource-load.service';
     standalone: true,
     imports: [NgClass, AsyncPipe],
     templateUrl: './loading-screen.component.html',
-    styleUrl: './loading-screen.component.scss'
+    styleUrl: './loading-screen.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoadingScreenComponent implements OnInit {
     @Input({ required: true }) module!: string;

@@ -1,15 +1,26 @@
 import { NgClass } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NetworkWarningComponent } from './network-warning/network-warning.component';
+
+import { AuthComponent } from './auth/auth.component';
+import { AuthService } from './auth/auth.service';
+import './auth/google-auth';
 
 @Component({
     selector: 'tyr-root',
     standalone: true,
-    imports: [RouterOutlet, NgClass, NetworkWarningComponent],
+    imports: [RouterOutlet, NgClass, NetworkWarningComponent, AuthComponent],
     templateUrl: './app.component.html',
-    styleUrl: './app.component.scss'
+    styleUrl: './app.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
     title = 'typingrealm';
+
+    constructor(private auth: AuthService) {}
+
+    async ngOnInit() {
+        await this.auth.getToken();
+    }
 }

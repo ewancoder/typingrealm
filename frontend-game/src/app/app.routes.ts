@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router, Routes } from '@angular/router';
+import { LocationEditorComponent } from './editor/locations/location-editor/location-editor.component';
+import { LocationsEditorComponent } from './editor/locations/locations-editor/locations-editor.component';
 import { GameComponent } from './game/game.component';
 import { LoadingScreenComponent } from './loading-screen/loading-screen.component';
 import { MainMenuComponent } from './main-menu/main-menu.component';
@@ -34,5 +36,8 @@ export const routes: Routes = [
     { path: 'warning', component: NetworkWarningComponent },
     { path: 'loading/:module', component: LoadingScreenComponent },
     { path: 'menu', component: MainMenuComponent },
-    { path: 'game', component: GameComponent, canActivate: [ResourcesLoadedGuard] }
+    { path: 'game', component: GameComponent, canActivate: [ResourcesLoadedGuard] },
+
+    { path: 'editor/locations', component: LocationsEditorComponent },
+    { path: 'editor/locations/:locationId', component: LocationEditorComponent }
 ];

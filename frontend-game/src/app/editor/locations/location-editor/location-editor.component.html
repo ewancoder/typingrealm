@@ -1,0 +1,15 @@
+<form [formGroup]="updateLocationForm" (ngSubmit)="updateInfo()">
+  <div>
+    <label for="name">Name: </label>
+    <input type="text" formControlName="name" />
+  </div>
+  <div>
+    <label for="description">Description: </label>
+    <textarea type="text" formControlName="description"></textarea>
+  </div>
+  <div>
+    <label for="path">Path: </label>
+    <input type="text" formControlName="path" />
+  </div>
+  <button type="submit" [disabled]="!updateLocationForm.valid">Create</button>
+</form>

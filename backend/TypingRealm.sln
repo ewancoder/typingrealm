@@ -24,7 +24,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TypingRealm.ApiHost", "Typi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TypingRealm.Game.Api", "TypingRealm.Game.Api\TypingRealm.Game.Api.csproj", "{15F0B74B-F0A2-492F-9631-6C9235F514F0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypingRealm.Typing.Tests", "TypingRealm.Typing.Tests\TypingRealm.Typing.Tests.csproj", "{058389F0-6063-46E3-B0DA-32940C10F0E5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TypingRealm.Typing.Tests", "TypingRealm.Typing.Tests\TypingRealm.Typing.Tests.csproj", "{058389F0-6063-46E3-B0DA-32940C10F0E5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypingRealm.Game.DataAccess", "TypingRealm.Game.DataAccess\TypingRealm.Game.DataAccess.csproj", "{9338946A-B960-49DD-81BF-6E675221A9EE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -60,6 +62,10 @@ Global
 		{058389F0-6063-46E3-B0DA-32940C10F0E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{058389F0-6063-46E3-B0DA-32940C10F0E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{058389F0-6063-46E3-B0DA-32940C10F0E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9338946A-B960-49DD-81BF-6E675221A9EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9338946A-B960-49DD-81BF-6E675221A9EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9338946A-B960-49DD-81BF-6E675221A9EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9338946A-B960-49DD-81BF-6E675221A9EE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

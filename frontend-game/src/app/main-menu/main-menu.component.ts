@@ -1,5 +1,5 @@
 import { NgClass } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { HdService } from '../loading-screen/loading-screen.component';
 import { PlayerService } from '../player.service';
@@ -10,7 +10,8 @@ import { initializeTypingState } from '../typing';
     standalone: true,
     imports: [NgClass],
     templateUrl: './main-menu.component.html',
-    styleUrl: './main-menu.component.scss'
+    styleUrl: './main-menu.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MainMenuComponent implements OnInit, OnDestroy {
     constructor(

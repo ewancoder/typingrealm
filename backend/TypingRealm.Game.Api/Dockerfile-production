@@ -1,9 +1,9 @@
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS base
 USER app
 WORKDIR /app
 EXPOSE 8080
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Directory.Build.props", "."]
@@ -11,22 +11,18 @@ COPY ["Directory.Packages.props", "."]
 COPY ["TypingRealm.ApiHost/TypingRealm.ApiHost.csproj", "TypingRealm.ApiHost/"]
 COPY ["TypingRealm.Framework/TypingRealm.Framework.csproj", "TypingRealm.Framework/"]
 COPY ["TypingRealm.Game.Api/TypingRealm.Game.Api.csproj", "TypingRealm.Game.Api/"]
+COPY ["TypingRealm.Game.DataAccess/TypingRealm.Game.DataAccess.csproj", "TypingRealm.Game.DataAccess/"]
 RUN dotnet restore "./TypingRealm.Game.Api/TypingRealm.Game.Api.csproj"
 COPY . .
 WORKDIR "/src/TypingRealm.Game.Api"
 RUN dotnet build "./TypingRealm.Game.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-RUN curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/latest/download/dbmate-linux-amd64
-RUN chmod +x /usr/local/bin/dbmate
-
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./TypingRealm.Game.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
-COPY ../db-game /app/publish/db
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-COPY --from=publish /usr/local/bin/dbmate /usr/local/bin/dbmate
 COPY --from=publish /app/publish/appsettings.production.json appsettings.json
-CMD dbmate --url $DATABASE_URL wait && dbmate --url $DATABASE_URL up && dotnet TypingRealm.Game.Api.dll
+ENTRYPOINT ["dotnet", "TypingRealm.Game.Api.dll"]
