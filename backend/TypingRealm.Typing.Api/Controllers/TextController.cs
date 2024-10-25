@@ -42,7 +42,7 @@ public sealed class TextController : ControllerBase
 
         var themeString = theme?.Length > 0
             ? $", theme based on '{theme}'"
-            : $", based on theme '{GetRandomTheme()}'";
+            : $", based on the mix of these themes: '{GetRandomTheme()}, {GetRandomTheme()}, {GetRandomTheme()}'";
 
         var languagePrompt = language == null ? string.Empty : $", in {language} language";
 
