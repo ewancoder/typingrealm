@@ -18,3 +18,14 @@ services:
     restart: unless-stopped
     mem_limit: 1g
     mem_reservation: 750m
+
+  typingrealm-pgadmin:
+    image: dpage/pgadmin4
+    container_name: typingrealm-pgadmin
+    volumes:
+      - /data/pgadmin/data:/var/lib/pgadmin
+    env_file:
+      - /data/pgadmin/secrets.env
+    restart: unless-stopped
+    mem_limit: 1g
+    mem_reservation: 750m
